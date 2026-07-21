@@ -3,6 +3,7 @@ name: Build and deploy StreamNova to MonsterASP.NET
 on:
   push:
     branches: [ main ]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -65,7 +66,7 @@ jobs:
           retention-days: 30
 
       - name: Deploy through WebDeploy
-        if: ${{ env.MONSTER_WEBSITE_NAME != '' && env.MONSTER_SERVER_COMPUTER_NAME != '' && env.MONSTER_SERVER_USERNAME != '' && env.MONSTER_SERVER_PASSWORD != '' }}
+        if: ${{ github.event_name != 'pull_request' && env.MONSTER_WEBSITE_NAME != '' && env.MONSTER_SERVER_COMPUTER_NAME != '' && env.MONSTER_SERVER_USERNAME != '' && env.MONSTER_SERVER_PASSWORD != '' }}
         uses: rasmusbuchholdt/simply-web-deploy@2.1.0
         with:
           website-name: ${{ env.MONSTER_WEBSITE_NAME }}
