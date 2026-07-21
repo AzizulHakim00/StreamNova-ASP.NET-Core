@@ -2,6 +2,7 @@ namespace StreamNova.Models;
 
 public sealed class DatabaseState
 {
+    public int SchemaVersion { get; set; }
     public List<AppUser> Users { get; set; } = [];
     public List<Movie> Movies { get; set; } = [];
     public List<WatchlistItem> Watchlist { get; set; } = [];
