@@ -26,6 +26,10 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MovieService>();
 builder.Services.AddScoped<UserMovieService>();
 builder.Services.AddScoped<ReviewService>();
+builder.Services.AddScoped<SubscriptionService>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<SupportService>();
+builder.Services.AddScoped<RecommendationService>();
 
 var app = builder.Build();
 
