@@ -18,13 +18,13 @@
                 <option value="anime">Anime</option>
             </select>
             <select name="region" aria-label="Provider region">
-                <option value="BD" selected="@(Model.Region == "BD")">Bangladesh</option>
-                <option value="US" selected="@(Model.Region == "US")">United States</option>
-                <option value="GB" selected="@(Model.Region == "GB")">United Kingdom</option>
-                <option value="IN" selected="@(Model.Region == "IN")">India</option>
-                <option value="JP" selected="@(Model.Region == "JP")">Japan</option>
-                <option value="CA" selected="@(Model.Region == "CA")">Canada</option>
-                <option value="AU" selected="@(Model.Region == "AU")">Australia</option>
+                <option value="BD" selected="@(Model.Region == "BD" ? "selected" : null)">Bangladesh</option>
+                <option value="US" selected="@(Model.Region == "US" ? "selected" : null)">United States</option>
+                <option value="GB" selected="@(Model.Region == "GB" ? "selected" : null)">United Kingdom</option>
+                <option value="IN" selected="@(Model.Region == "IN" ? "selected" : null)">India</option>
+                <option value="JP" selected="@(Model.Region == "JP" ? "selected" : null)">Japan</option>
+                <option value="CA" selected="@(Model.Region == "CA" ? "selected" : null)">Canada</option>
+                <option value="AU" selected="@(Model.Region == "AU" ? "selected" : null)">Australia</option>
             </select>
             <button class="button button-primary" type="submit">Search</button>
         </form>
