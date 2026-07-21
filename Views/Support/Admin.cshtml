@@ -1,0 +1,58 @@
+@model IReadOnlyList<AdminSupportTicketViewModel>
+@{
+    ViewData["Title"] = "Support operations";
+}
+<section class="page-shell page-top platform-page">
+    <div class="platform-heading">
+        <div>
+            <span class="eyebrow">Operations center</span>
+            <h1>Support queue</h1>
+            <p>Review customer requests and publish responses directly to their notification center.</p>
+        </div>
+        <a class="button button-glass" asp-controller="Admin" asp-action="Index">Back to dashboard</a>
+    </div>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert-success">@success</div>
+    }
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert-error">@error</div>
+    }
+
+    <div class="admin-ticket-list">
+        @if (Model.Count == 0)
+        {
+            <div class="empty-state"><h2>No support tickets</h2><p>The queue is currently clear.</p></div>
+        }
+        @foreach (var item in Model)
+        {
+            <article class="admin-ticket-card">
+                <div class="ticket-card-head">
+                    <div>
+                        <span class="ticket-id">#@item.Ticket.Id.ToString()[..8].ToUpperInvariant()</span>
+                        <h2>@item.Ticket.Subject</h2>
+                        <p>@item.UserName · @item.UserEmail</p>
+                    </div>
+                    <span class="ticket-status status-@item.Ticket.Status.Replace(" ", "-").ToLowerInvariant()">@item.Ticket.Status</span>
+                </div>
+                <div class="ticket-meta"><span>@item.Ticket.Category</span><span>@item.Ticket.Priority priority</span><span>@item.Ticket.CreatedAtUtc.ToString("dd MMM yyyy, HH:mm") UTC</span></div>
+                <p class="ticket-description">@item.Ticket.Description</p>
+                @if (item.Ticket.Status == TicketStatuses.Resolved)
+                {
+                    <div class="ticket-response"><strong>Published response</strong><p>@item.Ticket.AdminResponse</p></div>
+                }
+                else
+                {
+                    <form class="ticket-resolve-form" asp-action="Resolve" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Ticket.Id" />
+                        <textarea name="response" rows="4" placeholder="Explain the resolution or next steps..." required></textarea>
+                        <button class="button button-primary" type="submit">Resolve and notify</button>
+                    </form>
+                }
+            </article>
+        }
+    </div>
+</section>
