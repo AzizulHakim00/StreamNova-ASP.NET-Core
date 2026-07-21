@@ -1,0 +1,61 @@
+@model NotificationCenterViewModel
+@{
+    ViewData["Title"] = "Notifications";
+}
+<section class="page-shell page-top platform-page">
+    <div class="platform-heading">
+        <div>
+            <span class="eyebrow">Activity center</span>
+            <h1>Notifications</h1>
+            <p>@Model.UnreadCount unread update@(Model.UnreadCount == 1 ? "" : "s")</p>
+        </div>
+        @if (Model.UnreadCount > 0)
+        {
+            <form asp-action="MarkAllRead" method="post">
+                @Html.AntiForgeryToken()
+                <button class="button button-glass" type="submit">Mark all read</button>
+            </form>
+        }
+    </div>
+
+    @if (Model.Notifications.Count == 0)
+    {
+        <div class="empty-state notification-empty">
+            <span class="empty-icon">✦</span>
+            <h2>You are all caught up</h2>
+            <p>Subscription updates, support replies, and important account activity will appear here.</p>
+        </div>
+    }
+    else
+    {
+        <div class="notification-list">
+            @foreach (var notification in Model.Notifications)
+            {
+                <article class="notification-card @(!notification.IsRead ? "notification-unread" : "")">
+                    <div class="notification-icon">@(notification.Type == "Support" ? "?" : notification.Type == "Subscription" ? "$" : "i")</div>
+                    <div>
+                        <div class="notification-title-row">
+                            <h2>@notification.Title</h2>
+                            <time>@notification.CreatedAtUtc.ToString("dd MMM, HH:mm") UTC</time>
+                        </div>
+                        <p>@notification.Message</p>
+                        <div class="notification-actions">
+                            @if (!string.IsNullOrWhiteSpace(notification.ActionUrl))
+                            {
+                                <a href="@notification.ActionUrl">Open details →</a>
+                            }
+                            @if (!notification.IsRead)
+                            {
+                                <form asp-action="Read" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@notification.Id" />
+                                    <button type="submit">Mark read</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
