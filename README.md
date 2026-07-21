@@ -14,8 +14,9 @@ StreamNova is an original Netflix-inspired streaming and content-operations plat
 - Open movie details and similar-title recommendations
 - Receive personalized recommendations based on watchlist, playback, and review activity
 - Add and remove titles from **My List**
-- Play direct public MP4 videos or use the built-in demo player
-- Save playback progress automatically
+- Play direct MP4, WebM, OGG, HLS, YouTube, and Vimeo sources
+- Watch included open-license short movies directly in the built-in player
+- Save playback progress automatically for HTML5 video sources
 - Resume a movie from the saved timestamp
 - See a personalized **Continue Watching** rail
 - Rate movies from 1 to 5 stars
@@ -45,7 +46,8 @@ StreamNova is an original Netflix-inspired streaming and content-operations plat
 - Open support-ticket metrics
 - Add, edit, and delete movies
 - Set featured, trending, and new-release flags
-- Configure poster, backdrop, and direct MP4 URLs
+- Configure poster, backdrop, MP4, WebM, OGG, HLS, YouTube, and Vimeo URLs
+- Record source credit, license information, and an official source page
 - View registered users and their activity totals
 - Moderate movie reviews
 - Review the support queue, publish resolutions, and notify customers
@@ -61,6 +63,18 @@ StreamNova is an original Netflix-inspired streaming and content-operations plat
 - Thread-safe local persistence with no external database dependency
 - No external NuGet packages required
 
+## Playback sources
+
+The player resolves media automatically from the URL entered by an administrator:
+
+- Direct MP4, WebM, and OGG files use the browser's HTML5 video player.
+- HLS `.m3u8` streams use native browser playback when available and HLS.js otherwise.
+- YouTube watch, short, live, and share URLs are converted to privacy-conscious embedded playback.
+- Vimeo page and player URLs are converted to embedded playback.
+- Unsupported or missing sources display a clear unavailable message instead of fake playback.
+
+The initial catalog includes four playable Blender open movies: **Big Buck Bunny**, **Elephants Dream**, **Sintel**, and **Tears of Steel**. Source and license information is displayed on the watch page. Only media that is owned, licensed, public-domain, open-license, or officially embeddable should be added.
+
 ## Technology stack
 
 - .NET 10 LTS
@@ -70,6 +84,7 @@ StreamNova is an original Netflix-inspired streaming and content-operations plat
 - PBKDF2 password hashing using built-in .NET cryptography
 - Thread-safe JSON persistence
 - HTML, CSS, and JavaScript
+- HLS.js for adaptive HLS playback where native support is unavailable
 - IIS, Docker, and GitHub Actions deployment support
 
 ## Demo accounts
@@ -79,7 +94,7 @@ StreamNova is an original Netflix-inspired streaming and content-operations plat
 | Administrator | `admin@streamnova.local` | `Admin@123` |
 | Viewer | `user@streamnova.local` | `User@123` |
 
-The demo accounts and initial movie catalog are created automatically on first start.
+The demo accounts and initial movie catalog are created automatically on first start. Existing databases are upgraded in place to add the open-movie catalog without deleting accounts, watchlists, reviews, or support data.
 
 ## Run locally
 
@@ -99,11 +114,11 @@ On Windows, `run.bat` can also be used. Visual Studio users can open `StreamNova
 The recommended no-subscription option is MonsterASP.NET's free ASP.NET hosting. The repository includes:
 
 - IIS in-process hosting configuration
-- A Windows x86 framework-dependent publish package
+- A framework-dependent publish package
 - A downloadable GitHub Actions ZIP artifact
-- Optional automatic WebDeploy publishing
+- Automatic WebDeploy publishing after repository secrets are configured
 
-Follow `MONSTERASP_FREE_DEPLOYMENT.md` for the complete setup. After the four hosting secrets are configured, every push to `main` can automatically deploy the newest StreamNova version.
+Follow `MONSTERASP_FREE_DEPLOYMENT.md` for the complete setup. After the four hosting secrets are configured, every push to `main` automatically deploys the newest StreamNova version.
 
 ## Run with Docker
 
@@ -141,7 +156,7 @@ Runtime data is stored by default in:
 App_Data/streamnova.json
 ```
 
-The JSON state includes users, movies, watchlists, playback progress, reviews, plans, subscriptions, notifications, and support tickets. Delete the generated file to reset the demo database. Back it up before a full manual deployment replacement.
+The JSON state includes users, movies, watchlists, playback progress, reviews, plans, subscriptions, notifications, support tickets, and a schema version for safe data upgrades. Delete the generated file to reset the demo database. Back it up before a full manual deployment replacement.
 
 ## Project structure
 
@@ -149,7 +164,7 @@ The JSON state includes users, movies, watchlists, playback progress, reviews, p
 StreamNova/
 ├── Controllers/       # account, browse, subscription, notifications, support, admin
 ├── Models/            # catalog and platform domain models
-├── Services/          # business logic and recommendation engine
+├── Services/          # business logic, playback resolver, migrations, recommendations
 ├── ViewModels/        # UI-specific data contracts
 ├── Views/             # Razor interfaces
 ├── wwwroot/           # styling, scripts, and artwork
@@ -162,6 +177,6 @@ StreamNova/
 └── StreamNova.csproj
 ```
 
-## Brand note
+## Brand and content note
 
-StreamNova uses an original name, interface details, and source code. It is inspired by familiar streaming-platform interaction patterns but is not affiliated with Netflix or another streaming service.
+StreamNova uses an original name, interface details, and source code. It is inspired by familiar streaming-platform interaction patterns but is not affiliated with Netflix or another streaming service. The project does not include or endorse unauthorized copyrighted movie streams.
