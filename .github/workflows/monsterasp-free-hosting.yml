@@ -34,8 +34,24 @@ jobs:
       - name: Build
         run: dotnet build StreamNova.csproj --configuration Release --no-restore
 
-      - name: Publish for Windows IIS
-        run: dotnet publish StreamNova.csproj --configuration Release --no-build --output ./publish --runtime win-x86 --self-contained false /p:UseAppHost=false
+      - name: Publish for MonsterASP IIS
+        run: dotnet publish StreamNova.csproj --configuration Release --no-build --output ./publish --self-contained false /p:UseAppHost=false
+
+      - name: Verify deployment package
+        shell: pwsh
+        run: |
+          $requiredFiles = @(
+            './publish/StreamNova.dll',
+            './publish/StreamNova.runtimeconfig.json',
+            './publish/StreamNova.deps.json',
+            './publish/web.config'
+          )
+
+          foreach ($file in $requiredFiles) {
+            if (-not (Test-Path $file)) {
+              throw "Required deployment file is missing: $file"
+            }
+          }
 
       - name: Create upload package
         shell: pwsh
