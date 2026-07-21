@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>StreamNova</RootNamespace>
     <AssemblyName>StreamNova</AssemblyName>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <Description>Netflix-inspired streaming catalog and movie management platform built with ASP.NET Core MVC.</Description>
   </PropertyGroup>
 </Project>
