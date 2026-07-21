@@ -2,7 +2,7 @@
 
 > Discover. Watch. Manage. Beyond the ordinary.
 
-StreamNova is an original Netflix-inspired streaming catalog and movie-management platform built with ASP.NET Core MVC and C#. It transforms a basic desktop movie manager into a responsive web application with secure accounts, personalized viewing, community reviews, and an administrator operations dashboard.
+StreamNova is an original Netflix-inspired streaming and content-operations platform built with ASP.NET Core MVC and C#. It transforms a basic movie manager into a multi-module web application with secure accounts, personalized discovery, membership plans, customer support, notifications, playback tracking, reviews, and administrator analytics.
 
 ## Functional features
 
@@ -12,6 +12,7 @@ StreamNova is an original Netflix-inspired streaming catalog and movie-managemen
 - Search by title, genre, or description
 - Filter movies by genre
 - Open movie details and similar-title recommendations
+- Receive personalized recommendations based on watchlist, playback, and review activity
 - Add and remove titles from **My List**
 - Play direct public MP4 videos or use the built-in demo player
 - Save playback progress automatically
@@ -19,18 +20,35 @@ StreamNova is an original Netflix-inspired streaming catalog and movie-managemen
 - See a personalized **Continue Watching** rail
 - Rate movies from 1 to 5 stars
 - Create, update, and delete personal reviews
-- Update the profile display name
-- Change the account password
-- View account activity statistics
+- Update the profile display name and password
+
+### Membership and account operations
+- Compare Mobile, Standard, and Premium plans
+- Activate or switch a subscription
+- Cancel a subscription while retaining the current renewal date
+- Track subscription status and simulated renewal dates
+- Receive subscription notifications
+- Open a centralized notification center
+- Mark individual or all notifications as read
+
+### Customer support
+- Create support tickets for account, playback, billing, general, and content-request issues
+- Select ticket priority
+- Track open and resolved requests
+- Read administrator responses inside the support center
+- Receive a notification when a ticket is opened or resolved
 
 ### Administrator experience
 - Role-protected administrator dashboard
 - Catalog, user, watchlist, playback, and review statistics
+- Active subscription and simulated monthly recurring revenue metrics
+- Open support-ticket metrics
 - Add, edit, and delete movies
 - Set featured, trending, and new-release flags
 - Configure poster, backdrop, and direct MP4 URLs
 - View registered users and their activity totals
-- Moderate any movie review
+- Moderate movie reviews
+- Review the support queue, publish resolutions, and notify customers
 
 ### Operations
 - Built-in `/health` endpoint
@@ -38,6 +56,7 @@ StreamNova is an original Netflix-inspired streaming catalog and movie-managemen
 - GitHub Actions build validation
 - Render Blueprint through `render.yaml`
 - Configurable JSON data path through `STREAMNOVA_DATA_PATH`
+- Thread-safe local persistence with no external database dependency
 - No external NuGet packages required
 
 ## Technology stack
@@ -58,7 +77,7 @@ StreamNova is an original Netflix-inspired streaming catalog and movie-managemen
 | Administrator | `admin@streamnova.local` | `Admin@123` |
 | Viewer | `user@streamnova.local` | `User@123` |
 
-The demo accounts and initial movie catalog are created automatically on the first application start.
+The demo accounts and initial movie catalog are created automatically on first start.
 
 ## Run locally
 
@@ -84,14 +103,14 @@ Open `http://localhost:8080`. The health endpoint is available at `http://localh
 
 ## Deploy on Render
 
-The repository contains `render.yaml` for one-click Docker deployment.
+The repository contains `render.yaml` for Docker deployment.
 
 1. Sign in to Render.
 2. Select **New → Blueprint**.
 3. Connect `AzizulHakim00/StreamNova-ASP.NET-Core`.
 4. Apply the Blueprint.
 
-The free Render filesystem is temporary. For permanent production data, attach a persistent disk and set:
+The free Render filesystem is temporary. For persistent production data, attach a disk and set:
 
 ```text
 STREAMNOVA_DATA_PATH=/var/data/streamnova.json
@@ -99,35 +118,25 @@ STREAMNOVA_DATA_PATH=/var/data/streamnova.json
 
 ## Data storage
 
-By default, runtime data is stored in:
+Runtime data is stored by default in:
 
 ```text
 App_Data/streamnova.json
 ```
 
-Delete that generated file to reset the demo database. The file is excluded from Git so passwords, account activity, reviews, and local changes are not committed.
-
-## Add a playable title
-
-1. Sign in with the administrator account.
-2. Open **Admin → Movies**.
-3. Add or edit a movie.
-4. Enter a direct public `.mp4` URL in **MP4 video URL**.
-5. Save the movie and open its playback page.
-
-When a movie has no direct video URL, StreamNova uses a functional simulated player while still saving and resuming viewing progress.
+The JSON state now includes users, movies, watchlists, playback progress, reviews, plans, subscriptions, notifications, and support tickets. Delete the generated file to reset the demo database.
 
 ## Project structure
 
 ```text
 StreamNova/
-├── Controllers/
-├── Models/
-├── Services/
-├── ViewModels/
-├── Views/
-├── wwwroot/
-├── App_Data/
+├── Controllers/       # account, browse, subscription, notifications, support, admin
+├── Models/            # catalog and platform domain models
+├── Services/          # business logic and recommendation engine
+├── ViewModels/        # UI-specific data contracts
+├── Views/             # Razor interfaces
+├── wwwroot/           # styling, scripts, and artwork
+├── App_Data/          # generated JSON database
 ├── .github/workflows/
 ├── Dockerfile
 ├── render.yaml
