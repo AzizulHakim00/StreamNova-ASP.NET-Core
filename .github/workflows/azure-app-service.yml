@@ -1,0 +1,52 @@
+name: Deploy StreamNova to Azure App Service
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  PUBLISH_DIRECTORY: '${{ github.workspace }}/azure-publish'
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore StreamNova.csproj
+
+      - name: Build release
+        run: dotnet build StreamNova.csproj --configuration Release --no-restore
+
+      - name: Publish Azure package
+        run: dotnet publish StreamNova.csproj --configuration Release --no-build --output "${{ env.PUBLISH_DIRECTORY }}"
+
+      - name: Deploy to Azure App Service
+        if: ${{ vars.AZURE_WEBAPP_NAME != '' }}
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.PUBLISH_DIRECTORY }}
+
+      - name: Azure deployment configuration reminder
+        if: ${{ vars.AZURE_WEBAPP_NAME == '' }}
+        run: |
+          echo "::notice::Build passed. To deploy, create repository variable AZURE_WEBAPP_NAME and secret AZURE_WEBAPP_PUBLISH_PROFILE, then run this workflow again."
