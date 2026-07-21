@@ -110,8 +110,8 @@ public static class PlayableCatalogMigration
             VideoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
             PlaybackLabel = "Full open movie",
             SourceCredit = "Blender Foundation",
-            SourcePageUrl = "https://studio.blender.org/projects/tears-of-steel/",
-            LicenseLabel = "Creative Commons / Blender Open Movie",
+            SourcePageUrl = "https://mango.blender.org/about/",
+            LicenseLabel = "Creative Commons Attribution 3.0",
             Score = 7.8,
             NewRelease = true
         }
