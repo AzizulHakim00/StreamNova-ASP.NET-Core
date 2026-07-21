@@ -13,17 +13,23 @@ public sealed class AdminController : Controller
     private readonly UserService _userService;
     private readonly UserMovieService _userMovieService;
     private readonly ReviewService _reviewService;
+    private readonly SubscriptionService _subscriptionService;
+    private readonly SupportService _supportService;
 
     public AdminController(
         MovieService movieService,
         UserService userService,
         UserMovieService userMovieService,
-        ReviewService reviewService)
+        ReviewService reviewService,
+        SubscriptionService subscriptionService,
+        SupportService supportService)
     {
         _movieService = movieService;
         _userService = userService;
         _userMovieService = userMovieService;
         _reviewService = reviewService;
+        _subscriptionService = subscriptionService;
+        _supportService = supportService;
     }
 
     public async Task<IActionResult> Index()
@@ -36,6 +42,9 @@ public sealed class AdminController : Controller
             WatchlistAdds = await _userMovieService.WatchlistCountAsync(),
             ActiveProgressItems = await _userMovieService.ProgressCountAsync(),
             TotalReviews = await _reviewService.CountAsync(),
+            ActiveSubscriptions = await _subscriptionService.ActiveCountAsync(),
+            MonthlyRecurringRevenue = await _subscriptionService.MonthlyRecurringRevenueAsync(),
+            OpenSupportTickets = await _supportService.OpenCountAsync(),
             LatestMovies = movies.OrderByDescending(movie => movie.Id).Take(5).ToList()
         };
         return View(model);

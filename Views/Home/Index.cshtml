@@ -58,6 +58,25 @@ else
             </section>
         }
 
+        @if (Model.Recommended.Count > 0)
+        {
+            <section class="content-row recommendation-row">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Smart discovery</span>
+                        <h2>Recommended for you</h2>
+                    </div>
+                    <a asp-controller="Browse" asp-action="Index">See more →</a>
+                </div>
+                <div class="movie-rail" data-rail>
+                    @foreach (var movie in Model.Recommended)
+                    {
+                        <partial name="_MovieCard" model="movie" />
+                    }
+                </div>
+            </section>
+        }
+
         <section class="content-row">
             <div class="section-heading">
                 <h2>Trending now</h2>

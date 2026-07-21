@@ -8,5 +8,6 @@ public sealed class HomeViewModel
     public IReadOnlyList<Movie> Trending { get; set; } = [];
     public IReadOnlyList<Movie> NewReleases { get; set; } = [];
     public IReadOnlyList<Movie> Drama { get; set; } = [];
+    public IReadOnlyList<Movie> Recommended { get; set; } = [];
     public IReadOnlyList<ContinueWatchingItemViewModel> ContinueWatching { get; set; } = [];
 }
