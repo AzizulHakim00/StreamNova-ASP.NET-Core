@@ -5,6 +5,11 @@
     var isHtmlVideo = Model.PlaybackKind == "direct" || Model.PlaybackKind == "hls";
 }
 
+@if (Model.PlaybackKind == "hls")
+{
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+}
+
 <section class="watch-page" data-watch-page data-movie-id="@Model.Movie.Id" data-duration="@(Model.Movie.DurationMinutes * 60)" data-resume="@Model.ResumeSeconds">
     <div class="watch-topbar">
         <a class="watch-back" asp-action="Details" asp-route-id="@Model.Movie.Id">← Back</a>
@@ -77,10 +82,6 @@
 <form id="progressTokenForm" class="hidden-form">@Html.AntiForgeryToken()</form>
 
 @section Scripts {
-    @if (Model.PlaybackKind == "hls")
-    {
-        <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
-    }
     <script>
         window.streamNovaWatch = {
             saveUrl: '@Url.Action("SaveProgress", "Browse", new { id = Model.Movie.Id })'
