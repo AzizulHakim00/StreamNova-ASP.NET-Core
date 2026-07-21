@@ -66,9 +66,30 @@
                 <span asp-validation-for="BackdropPath" class="field-error"></span>
             </div>
             <div class="form-field form-wide">
-                <label asp-for="VideoUrl">MP4 video URL (optional)</label>
-                <input asp-for="VideoUrl" />
+                <label asp-for="VideoUrl">Playback URL</label>
+                <input asp-for="VideoUrl" placeholder="MP4, HLS .m3u8, YouTube, or Vimeo URL" />
+                <small class="form-hint">Use only media you own, licensed media, public-domain media, or an official embeddable trailer.</small>
                 <span asp-validation-for="VideoUrl" class="field-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="PlaybackLabel">Playback label</label>
+                <input asp-for="PlaybackLabel" placeholder="Full open movie or Official trailer" />
+                <span asp-validation-for="PlaybackLabel" class="field-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="LicenseLabel">License</label>
+                <input asp-for="LicenseLabel" placeholder="CC BY or Official trailer" />
+                <span asp-validation-for="LicenseLabel" class="field-error"></span>
+            </div>
+            <div class="form-field form-wide">
+                <label asp-for="SourceCredit">Source credit</label>
+                <input asp-for="SourceCredit" placeholder="Creator, studio, or official channel" />
+                <span asp-validation-for="SourceCredit" class="field-error"></span>
+            </div>
+            <div class="form-field form-wide">
+                <label asp-for="SourcePageUrl">Source page URL</label>
+                <input asp-for="SourcePageUrl" placeholder="Official project or trailer page" />
+                <span asp-validation-for="SourcePageUrl" class="field-error"></span>
             </div>
         </div>
         <div class="flag-grid">

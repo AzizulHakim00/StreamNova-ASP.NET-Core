@@ -1,38 +1,83 @@
 @model WatchViewModel
 @{
     ViewData["Title"] = $"Watching {Model.Movie.Title}";
+    var isEmbedded = Model.PlaybackKind == "youtube" || Model.PlaybackKind == "vimeo";
+    var isHtmlVideo = Model.PlaybackKind == "direct" || Model.PlaybackKind == "hls";
+}
+
+@if (Model.PlaybackKind == "hls")
+{
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 }
 
 <section class="watch-page" data-watch-page data-movie-id="@Model.Movie.Id" data-duration="@(Model.Movie.DurationMinutes * 60)" data-resume="@Model.ResumeSeconds">
     <div class="watch-topbar">
         <a class="watch-back" asp-action="Details" asp-route-id="@Model.Movie.Id">← Back</a>
-        <strong>@Model.Movie.Title</strong>
-        <span>@Model.Movie.MaturityRating</span>
+        <div class="watch-title-group">
+            <strong>@Model.Movie.Title</strong>
+            @if (!string.IsNullOrWhiteSpace(Model.Movie.PlaybackLabel))
+            {
+                <small>@Model.Movie.PlaybackLabel</small>
+            }
+        </div>
+        <div class="watch-source-group">
+            @if (!string.IsNullOrWhiteSpace(Model.Movie.SourcePageUrl))
+            {
+                <a href="@Model.Movie.SourcePageUrl" target="_blank" rel="noopener noreferrer">Source ↗</a>
+            }
+            <span>@Model.Movie.MaturityRating</span>
+        </div>
     </div>
+
     <div class="player-shell" style="--player-image: url('@Model.Movie.BackdropPath')">
-        @if (!string.IsNullOrWhiteSpace(Model.Movie.VideoUrl))
+        @if (isEmbedded)
         {
-            <video id="moviePlayer" controls poster="@Model.Movie.BackdropPath" preload="metadata">
-                <source src="@Model.Movie.VideoUrl" type="video/mp4" />
+            <iframe class="external-player"
+                    src="@Model.PlaybackUrl"
+                    title="@Model.Movie.Title player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen></iframe>
+        }
+        else if (isHtmlVideo)
+        {
+            <video id="moviePlayer"
+                   controls
+                   playsinline
+                   poster="@Model.Movie.BackdropPath"
+                   preload="metadata"
+                   data-hls-source="@(Model.PlaybackKind == "hls" ? Model.PlaybackUrl : null)">
+                @if (Model.PlaybackKind == "direct")
+                {
+                    <source src="@Model.PlaybackUrl" type="@Model.PlaybackMimeType" />
+                }
                 Your browser does not support HTML video.
             </video>
         }
         else
         {
-            <div class="demo-player" data-demo-player>
+            <div class="demo-player unavailable-player">
                 <div class="demo-player-overlay">
-                    <button class="big-play" type="button" data-play-toggle>▶</button>
+                    <span class="unavailable-icon">▶</span>
                     <h1>@Model.Movie.Title</h1>
-                    <p>Demo playback mode. Your progress is saved automatically. An administrator can add a direct MP4 URL from the movie editor.</p>
-                </div>
-                <div class="demo-controls">
-                    <button type="button" data-play-toggle>▶</button>
-                    <span class="progress-track"><span class="progress-fill" data-progress-fill></span></span>
-                    <span data-time-label>00:00 / @Model.Movie.DurationMinutes:00</span>
+                    <p>No licensed playback source is connected to this title yet. An administrator can add a direct MP4, HLS, YouTube, or Vimeo URL.</p>
+                    <a class="button button-light" asp-action="Details" asp-route-id="@Model.Movie.Id">Return to details</a>
                 </div>
             </div>
         }
     </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Movie.SourceCredit) || !string.IsNullOrWhiteSpace(Model.Movie.LicenseLabel))
+    {
+        <aside class="playback-credit">
+            <span>Playback source</span>
+            <strong>@Model.Movie.SourceCredit</strong>
+            @if (!string.IsNullOrWhiteSpace(Model.Movie.LicenseLabel))
+            {
+                <small>@Model.Movie.LicenseLabel</small>
+            }
+        </aside>
+    }
 </section>
 <form id="progressTokenForm" class="hidden-form">@Html.AntiForgeryToken()</form>
 

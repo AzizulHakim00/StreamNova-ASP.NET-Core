@@ -34,6 +34,11 @@ public sealed class JsonDatabase
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
         if (File.Exists(FilePath))
         {
+            await UpdateAsync(state =>
+            {
+                PlayableCatalogMigration.Apply(state);
+                return true;
+            });
             return;
         }
 
@@ -42,6 +47,7 @@ public sealed class JsonDatabase
 
         var state = new DatabaseState
         {
+            SchemaVersion = PlayableCatalogMigration.SchemaVersion,
             Users =
             [
                 new AppUser
@@ -61,7 +67,7 @@ public sealed class JsonDatabase
                     Role = UserRoles.Customer
                 }
             ],
-            Movies = SeedMovies()
+            Movies = BuildInitialMovies()
         };
 
         await WriteInternalAsync(state);
@@ -118,6 +124,18 @@ public sealed class JsonDatabase
         }
 
         File.Move(temporary, FilePath, true);
+    }
+
+    private static List<Movie> BuildInitialMovies()
+    {
+        var movies = PlayableCatalogMigration.BuildOpenMovies();
+        movies.AddRange(SeedMovies());
+        for (var index = 0; index < movies.Count; index++)
+        {
+            movies[index].Id = index + 1;
+        }
+
+        return movies;
     }
 
     private static List<Movie> SeedMovies() =>
