@@ -1,0 +1,45 @@
+@model WatchViewModel
+@{
+    ViewData["Title"] = $"Watching {Model.Movie.Title}";
+}
+
+<section class="watch-page" data-watch-page data-movie-id="@Model.Movie.Id" data-duration="@(Model.Movie.DurationMinutes * 60)" data-resume="@Model.ResumeSeconds">
+    <div class="watch-topbar">
+        <a class="watch-back" asp-action="Details" asp-route-id="@Model.Movie.Id">← Back</a>
+        <strong>@Model.Movie.Title</strong>
+        <span>@Model.Movie.MaturityRating</span>
+    </div>
+    <div class="player-shell" style="--player-image: url('@Model.Movie.BackdropPath')">
+        @if (!string.IsNullOrWhiteSpace(Model.Movie.VideoUrl))
+        {
+            <video id="moviePlayer" controls poster="@Model.Movie.BackdropPath" preload="metadata">
+                <source src="@Model.Movie.VideoUrl" type="video/mp4" />
+                Your browser does not support HTML video.
+            </video>
+        }
+        else
+        {
+            <div class="demo-player" data-demo-player>
+                <div class="demo-player-overlay">
+                    <button class="big-play" type="button" data-play-toggle>▶</button>
+                    <h1>@Model.Movie.Title</h1>
+                    <p>Demo playback mode. Your progress is saved automatically. An administrator can add a direct MP4 URL from the movie editor.</p>
+                </div>
+                <div class="demo-controls">
+                    <button type="button" data-play-toggle>▶</button>
+                    <span class="progress-track"><span class="progress-fill" data-progress-fill></span></span>
+                    <span data-time-label>00:00 / @Model.Movie.DurationMinutes:00</span>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+<form id="progressTokenForm" class="hidden-form">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+    <script>
+        window.streamNovaWatch = {
+            saveUrl: '@Url.Action("SaveProgress", "Browse", new { id = Model.Movie.Id })'
+        };
+    </script>
+}

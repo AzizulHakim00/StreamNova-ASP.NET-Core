@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: streamnova-aspnet-core
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production

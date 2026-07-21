@@ -1,0 +1,15 @@
+@model Movie
+<article class="movie-card">
+    <a class="movie-card-image" asp-controller="Browse" asp-action="Details" asp-route-id="@Model.Id">
+        <img src="@Model.PosterPath" alt="@Model.Title poster" loading="lazy" />
+        <span class="movie-card-play">▶</span>
+    </a>
+    <div class="movie-card-body">
+        <div class="movie-card-title-row">
+            <h3>@Model.Title</h3>
+            <span class="score">@Model.Score.ToString("0.0")</span>
+        </div>
+        <p>@Model.Year · @Model.MaturityRating · @Model.DurationMinutes min</p>
+        <span class="genre-pill">@Model.Genre</span>
+    </div>
+</article>

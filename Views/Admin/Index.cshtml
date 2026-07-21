@@ -1,0 +1,42 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin dashboard";
+}
+<section class="page-shell page-top admin-page">
+    <div class="admin-heading">
+        <div>
+            <span class="eyebrow">Operations center</span>
+            <h1>Admin dashboard</h1>
+            <p>Manage the catalog and review viewer activity.</p>
+        </div>
+        <div class="hero-actions">
+            <a class="button button-glass" asp-action="Users">View users</a>
+            <a class="button button-primary" asp-action="Create">+ Add movie</a>
+        </div>
+    </div>
+
+    <div class="stat-grid stat-grid-five">
+        <article class="stat-card"><span>Titles</span><strong>@Model.TotalMovies</strong><small>Movies in catalog</small></article>
+        <article class="stat-card"><span>Profiles</span><strong>@Model.TotalUsers</strong><small>Registered users</small></article>
+        <article class="stat-card"><span>My List adds</span><strong>@Model.WatchlistAdds</strong><small>Saved selections</small></article>
+        <article class="stat-card"><span>Playback records</span><strong>@Model.ActiveProgressItems</strong><small>Progress items</small></article>
+        <article class="stat-card"><span>Reviews</span><strong>@Model.TotalReviews</strong><small>Viewer feedback</small></article>
+    </div>
+
+    <div class="admin-panel">
+        <div class="section-heading">
+            <h2>Latest catalog entries</h2>
+            <a asp-action="Movies">Manage all →</a>
+        </div>
+        <div class="admin-movie-list">
+            @foreach (var movie in Model.LatestMovies)
+            {
+                <article>
+                    <img src="@movie.PosterPath" alt="" />
+                    <div><strong>@movie.Title</strong><span>@movie.Genre · @movie.Year</span></div>
+                    <a class="button button-small button-glass" asp-action="Edit" asp-route-id="@movie.Id">Edit</a>
+                </article>
+            }
+        </div>
+    </div>
+</section>

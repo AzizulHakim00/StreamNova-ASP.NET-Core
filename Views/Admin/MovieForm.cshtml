@@ -1,0 +1,81 @@
+@model Movie
+@{
+    var editing = Model.Id > 0;
+    var formAction = editing ? "Edit" : "Create";
+    ViewData["Title"] = editing ? "Edit movie" : "Add movie";
+}
+<section class="page-shell page-top admin-page">
+    <div class="admin-heading">
+        <div>
+            <span class="eyebrow">Catalog editor</span>
+            <h1>@(editing ? "Edit movie" : "Add movie")</h1>
+        </div>
+        <a class="button button-glass" asp-action="Movies">← Back to movies</a>
+    </div>
+
+    <form asp-action="@formAction" method="post" class="movie-form">
+        @if (editing)
+        {
+            <input asp-for="Id" type="hidden" />
+        }
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+        <div class="form-grid">
+            <div class="form-field form-wide">
+                <label asp-for="Title"></label>
+                <input asp-for="Title" />
+                <span asp-validation-for="Title" class="field-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Genre"></label>
+                <input asp-for="Genre" />
+                <span asp-validation-for="Genre" class="field-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="MaturityRating">Maturity rating</label>
+                <input asp-for="MaturityRating" />
+                <span asp-validation-for="MaturityRating" class="field-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Year"></label>
+                <input asp-for="Year" />
+                <span asp-validation-for="Year" class="field-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="DurationMinutes">Duration (minutes)</label>
+                <input asp-for="DurationMinutes" />
+                <span asp-validation-for="DurationMinutes" class="field-error"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Score">Viewer score (0–10)</label>
+                <input asp-for="Score" step="0.1" />
+                <span asp-validation-for="Score" class="field-error"></span>
+            </div>
+            <div class="form-field form-wide">
+                <label asp-for="Synopsis"></label>
+                <textarea asp-for="Synopsis" rows="5"></textarea>
+                <span asp-validation-for="Synopsis" class="field-error"></span>
+            </div>
+            <div class="form-field form-wide">
+                <label asp-for="PosterPath">Poster path or URL</label>
+                <input asp-for="PosterPath" />
+                <span asp-validation-for="PosterPath" class="field-error"></span>
+            </div>
+            <div class="form-field form-wide">
+                <label asp-for="BackdropPath">Backdrop path or URL</label>
+                <input asp-for="BackdropPath" />
+                <span asp-validation-for="BackdropPath" class="field-error"></span>
+            </div>
+            <div class="form-field form-wide">
+                <label asp-for="VideoUrl">MP4 video URL (optional)</label>
+                <input asp-for="VideoUrl" />
+                <span asp-validation-for="VideoUrl" class="field-error"></span>
+            </div>
+        </div>
+        <div class="flag-grid">
+            <label class="checkbox-card"><input asp-for="Featured" /><span><strong>Featured hero</strong><small>Show as the home-page hero</small></span></label>
+            <label class="checkbox-card"><input asp-for="Trending" /><span><strong>Trending</strong><small>Add to the trending rail</small></span></label>
+            <label class="checkbox-card"><input asp-for="NewRelease" /><span><strong>New release</strong><small>Add to the new-release rail</small></span></label>
+        </div>
+        <button class="button button-primary" type="submit">@(editing ? "Save changes" : "Add movie")</button>
+    </form>
+</section>

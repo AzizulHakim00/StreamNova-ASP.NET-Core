@@ -1,0 +1,144 @@
+@model MovieDetailsViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = Model.Movie.Title;
+    var ratingOptions = Enumerable.Range(1, 5)
+        .Reverse()
+        .Select(value => new SelectListItem($"{value} star{(value == 1 ? "" : "s")}", value.ToString())
+        {
+            Selected = value == Model.ReviewInput.Rating
+        });
+}
+
+<section class="details-hero" style="--details-image: url('@Model.Movie.BackdropPath')">
+    <div class="details-shade"></div>
+    <div class="page-shell details-content">
+        <span class="eyebrow">@Model.Movie.Genre</span>
+        <h1>@Model.Movie.Title</h1>
+        <div class="hero-meta">
+            <span class="match">@((int)(Model.Movie.Score * 10))% match</span>
+            <span>@Model.Movie.Year</span>
+            <span class="rating-box">@Model.Movie.MaturityRating</span>
+            <span>@Model.Movie.DurationMinutes min</span>
+            @if (Model.ReviewCount > 0)
+            {
+                <span class="viewer-rating">★ @Model.AverageReviewRating / 5</span>
+            }
+        </div>
+        <p>@Model.Movie.Synopsis</p>
+        <div class="hero-actions">
+            <a class="button button-light" asp-action="Watch" asp-route-id="@Model.Movie.Id">@(Model.ResumeSeconds > 0 ? "▶ Resume" : "▶ Play")</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form asp-controller="Watchlist" asp-action="Toggle" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="movieId" value="@Model.Movie.Id" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <button class="button button-glass" type="submit">@(Model.InWatchlist ? "✓ In My List" : "+ My List")</button>
+                </form>
+            }
+            else
+            {
+                <a class="button button-glass" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path">+ My List</a>
+            }
+        </div>
+        @if (Model.ResumeSeconds > 0)
+        {
+            <p class="resume-note">Saved at @(TimeSpan.FromSeconds(Model.ResumeSeconds).ToString(@"hh\:mm\:ss"))</p>
+        }
+    </div>
+</section>
+
+<section class="page-shell details-lower">
+    <div class="details-facts">
+        <div><span>Genre</span><strong>@Model.Movie.Genre</strong></div>
+        <div><span>Release year</span><strong>@Model.Movie.Year</strong></div>
+        <div><span>Audience</span><strong>@Model.Movie.MaturityRating</strong></div>
+        <div><span>Viewer rating</span><strong>@(Model.ReviewCount == 0 ? "No reviews" : $"{Model.AverageReviewRating}/5 ({Model.ReviewCount})")</strong></div>
+    </div>
+
+    <section class="reviews-section" id="reviews">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Community</span>
+                <h2>Viewer reviews</h2>
+            </div>
+            <span class="review-summary">@(Model.ReviewCount == 0 ? "Be the first to review" : $"{Model.ReviewCount} review{(Model.ReviewCount == 1 ? "" : "s")}")</span>
+        </div>
+
+        @if (TempData["ReviewSuccess"] is string reviewSuccess)
+        {
+            <div class="alert-success">@reviewSuccess</div>
+        }
+        @if (TempData["ReviewError"] is string reviewError)
+        {
+            <div class="alert-error">@reviewError</div>
+        }
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <form class="review-form" asp-controller="Reviews" asp-action="Save" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="movieId" value="@Model.Movie.Id" />
+                <div class="review-form-row">
+                    <label for="Rating">Your rating</label>
+                    @Html.DropDownList("Rating", ratingOptions, new { @class = "review-rating", id = "Rating" })
+                </div>
+                <label for="Comment">Your review</label>
+                <textarea id="Comment" name="Comment" rows="4" maxlength="800" required placeholder="What did you think of this title?">@Model.ReviewInput.Comment</textarea>
+                <div class="review-form-actions">
+                    <button class="button button-primary" type="submit">@(Model.CurrentUserReviewId.HasValue ? "Update review" : "Post review")</button>
+                    @if (Model.CurrentUserReviewId.HasValue)
+                    {
+                        <span>You can update your existing review here.</span>
+                    }
+                </div>
+            </form>
+        }
+        else
+        {
+            <div class="review-login-callout">
+                <p>Sign in to rate and review this movie.</p>
+                <a class="button button-glass" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@($"{Context.Request.Path}#reviews")">Sign in</a>
+            </div>
+        }
+
+        <div class="review-list">
+            @foreach (var review in Model.Reviews)
+            {
+                <article class="review-card">
+                    <div class="review-card-head">
+                        <div>
+                            <strong>@review.ReviewerName</strong>
+                            <span>@review.UpdatedAtUtc.ToLocalTime().ToString("MMM d, yyyy")</span>
+                        </div>
+                        <span class="review-stars">@(new string('★', review.Rating))@(new string('☆', 5 - review.Rating))</span>
+                    </div>
+                    <p>@review.Comment</p>
+                    @if (review.IsOwner || User.IsInRole(UserRoles.Admin))
+                    {
+                        <form asp-controller="Reviews" asp-action="Delete" method="post" onsubmit="return confirm('Delete this review?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@review.Id" />
+                            <input type="hidden" name="movieId" value="@Model.Movie.Id" />
+                            <button class="text-danger" type="submit">Delete review</button>
+                        </form>
+                    }
+                </article>
+            }
+        </div>
+    </section>
+
+    @if (Model.Similar.Count > 0)
+    {
+        <section class="content-row">
+            <div class="section-heading"><h2>More like this</h2></div>
+            <div class="movie-grid movie-grid-compact">
+                @foreach (var movie in Model.Similar)
+                {
+                    <partial name="_MovieCard" model="movie" />
+                }
+            </div>
+        </section>
+    }
+</section>

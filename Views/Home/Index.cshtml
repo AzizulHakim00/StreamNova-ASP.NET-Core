@@ -1,0 +1,98 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+@if (Model.Featured.Id == 0)
+{
+    <section class="empty-state page-shell">
+        <h1>No movies yet</h1>
+        <p>Sign in as an administrator and add the first title.</p>
+    </section>
+}
+else
+{
+    <section class="hero" style="--hero-image: url('@Model.Featured.BackdropPath')">
+        <div class="hero-shade"></div>
+        <div class="hero-content page-shell">
+            <span class="eyebrow">StreamNova Original Pick</span>
+            <h1>@Model.Featured.Title</h1>
+            <div class="hero-meta">
+                <span class="match">@((int)(Model.Featured.Score * 10))% match</span>
+                <span>@Model.Featured.Year</span>
+                <span class="rating-box">@Model.Featured.MaturityRating</span>
+                <span>@Model.Featured.DurationMinutes min</span>
+            </div>
+            <p>@Model.Featured.Synopsis</p>
+            <div class="hero-actions">
+                <a class="button button-light" asp-controller="Browse" asp-action="Watch" asp-route-id="@Model.Featured.Id">▶ Play</a>
+                <a class="button button-glass" asp-controller="Browse" asp-action="Details" asp-route-id="@Model.Featured.Id">ⓘ More info</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="catalog page-shell catalog-overlap">
+        @if (Model.ContinueWatching.Count > 0)
+        {
+            <section class="content-row">
+                <div class="section-heading">
+                    <h2>Continue watching</h2>
+                    <a asp-controller="Account" asp-action="Profile">Viewing activity →</a>
+                </div>
+                <div class="movie-rail" data-rail>
+                    @foreach (var item in Model.ContinueWatching)
+                    {
+                        <article class="movie-card continue-card">
+                            <a class="movie-card-image" asp-controller="Browse" asp-action="Watch" asp-route-id="@item.Movie.Id">
+                                <img src="@item.Movie.PosterPath" alt="@item.Movie.Title poster" loading="lazy" />
+                                <span class="movie-card-play">▶</span>
+                                <span class="continue-progress"><span style="width:@item.Percentage%"></span></span>
+                            </a>
+                            <div class="movie-card-body">
+                                <div class="movie-card-title-row"><h3>@item.Movie.Title</h3><span class="score">@item.Percentage%</span></div>
+                                <p>Resume from @(TimeSpan.FromSeconds(item.ProgressSeconds).ToString(@"hh\:mm\:ss"))</p>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+
+        <section class="content-row">
+            <div class="section-heading">
+                <h2>Trending now</h2>
+                <a asp-controller="Browse" asp-action="Index">Explore all →</a>
+            </div>
+            <div class="movie-rail" data-rail>
+                @foreach (var movie in Model.Trending)
+                {
+                    <partial name="_MovieCard" model="movie" />
+                }
+            </div>
+        </section>
+
+        <section class="content-row">
+            <div class="section-heading">
+                <h2>New releases</h2>
+            </div>
+            <div class="movie-rail" data-rail>
+                @foreach (var movie in Model.NewReleases)
+                {
+                    <partial name="_MovieCard" model="movie" />
+                }
+            </div>
+        </section>
+
+        <section class="content-row">
+            <div class="section-heading">
+                <h2>Mind-bending stories</h2>
+            </div>
+            <div class="movie-rail" data-rail>
+                @foreach (var movie in Model.Drama)
+                {
+                    <partial name="_MovieCard" model="movie" />
+                }
+            </div>
+        </section>
+    </div>
+}

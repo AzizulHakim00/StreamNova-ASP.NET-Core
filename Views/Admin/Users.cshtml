@@ -1,0 +1,32 @@
+@model IReadOnlyList<AdminUserViewModel>
+@{
+    ViewData["Title"] = "Manage users";
+}
+<section class="page-shell page-top admin-page">
+    <div class="admin-heading">
+        <div>
+            <span class="eyebrow">Audience management</span>
+            <h1>Users</h1>
+            <p>Review registered accounts and their activity.</p>
+        </div>
+        <a class="button button-glass" asp-action="Index">Dashboard</a>
+    </div>
+
+    <div class="table-shell">
+        <table class="admin-table">
+            <thead><tr><th>User</th><th>Role</th><th>Joined</th><th>My List</th><th>Reviews</th></tr></thead>
+            <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td><div class="table-user"><span class="avatar">@user.Name[0].ToString().ToUpperInvariant()</span><div><strong>@user.Name</strong><span>@user.Email</span></div></div></td>
+                    <td><span class="admin-badge">@user.Role</span></td>
+                    <td>@user.CreatedAtUtc.ToLocalTime().ToString("MMM d, yyyy")</td>
+                    <td>@user.WatchlistCount</td>
+                    <td>@user.ReviewCount</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>

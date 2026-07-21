@@ -1,0 +1,30 @@
+@model IReadOnlyList<Movie>
+@{
+    ViewData["Title"] = "My List";
+}
+<section class="page-shell page-top">
+    <div class="browse-heading">
+        <div>
+            <span class="eyebrow">Saved for later</span>
+            <h1>My List</h1>
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <h2>Your list is empty</h2>
+            <p>Add movies from their details page and they will appear here.</p>
+            <a class="button button-primary" asp-controller="Browse" asp-action="Index">Browse movies</a>
+        </div>
+    }
+    else
+    {
+        <div class="movie-grid">
+            @foreach (var movie in Model)
+            {
+                <partial name="_MovieCard" model="movie" />
+            }
+        </div>
+    }
+</section>

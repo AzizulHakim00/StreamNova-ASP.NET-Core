@@ -1,0 +1,49 @@
+@model BrowseViewModel
+@{
+    ViewData["Title"] = "Browse";
+}
+
+<section class="page-shell page-top">
+    <div class="browse-heading">
+        <div>
+            <span class="eyebrow">Discover your next story</span>
+            <h1>Browse movies</h1>
+        </div>
+        <form class="browse-search" method="get">
+            <input type="search" name="q" value="@Model.Query" placeholder="Search titles or genres" />
+            <select name="genre">
+                <option value="">All genres</option>
+                @foreach (var genre in Model.Genres)
+                {
+                    if (Model.Genre == genre)
+                    {
+                        <option value="@genre" selected>@genre</option>
+                    }
+                    else
+                    {
+                        <option value="@genre">@genre</option>
+                    }
+                }
+            </select>
+            <button class="button button-primary" type="submit">Search</button>
+        </form>
+    </div>
+
+    @if (Model.Movies.Count == 0)
+    {
+        <div class="empty-state">
+            <h2>No matching titles</h2>
+            <p>Try another title, keyword, or genre.</p>
+            <a class="button button-glass" asp-action="Index">Clear filters</a>
+        </div>
+    }
+    else
+    {
+        <div class="movie-grid">
+            @foreach (var movie in Model.Movies)
+            {
+                <partial name="_MovieCard" model="movie" />
+            }
+        </div>
+    }
+</section>

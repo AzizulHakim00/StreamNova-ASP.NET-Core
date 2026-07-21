@@ -1,0 +1,49 @@
+@model IReadOnlyList<Movie>
+@{
+    ViewData["Title"] = "Manage movies";
+}
+<section class="page-shell page-top admin-page">
+    <div class="admin-heading">
+        <div>
+            <span class="eyebrow">Catalog management</span>
+            <h1>Movies</h1>
+        </div>
+        <a class="button button-primary" asp-action="Create">+ Add movie</a>
+    </div>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert-success">@success</div>
+    }
+
+    <div class="table-shell">
+        <table class="admin-table">
+            <thead><tr><th>Movie</th><th>Genre</th><th>Year</th><th>Score</th><th>Flags</th><th>Actions</th></tr></thead>
+            <tbody>
+            @foreach (var movie in Model)
+            {
+                <tr>
+                    <td><div class="table-movie"><img src="@movie.PosterPath" alt="" /><div><strong>@movie.Title</strong><span>@movie.MaturityRating · @movie.DurationMinutes min</span></div></div></td>
+                    <td>@movie.Genre</td>
+                    <td>@movie.Year</td>
+                    <td>@movie.Score.ToString("0.0")</td>
+                    <td>
+                        @if (movie.Featured) { <span class="admin-badge">Featured</span> }
+                        @if (movie.Trending) { <span class="admin-badge">Trending</span> }
+                        @if (movie.NewRelease) { <span class="admin-badge">New</span> }
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <a asp-action="Edit" asp-route-id="@movie.Id">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@movie.Id" method="post" onsubmit="return confirm('Delete this movie?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>
