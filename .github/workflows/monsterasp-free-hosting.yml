@@ -14,6 +14,10 @@ concurrency:
 
 env:
   DOTNET_VERSION: 10.0.x
+  WEBSITE_NAME: ${{ secrets.WEBSITE_NAME }}
+  SERVER_COMPUTER_NAME: ${{ secrets.SERVER_COMPUTER_NAME }}
+  SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
+  SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
 
 jobs:
   build-and-deploy:
@@ -65,10 +69,10 @@ jobs:
           retention-days: 30
 
       - name: Deploy through WebDeploy
-        if: ${{ secrets.WEBSITE_NAME != '' && secrets.SERVER_COMPUTER_NAME != '' && secrets.SERVER_USERNAME != '' && secrets.SERVER_PASSWORD != '' }}
+        if: ${{ env.WEBSITE_NAME != '' && env.SERVER_COMPUTER_NAME != '' && env.SERVER_USERNAME != '' && env.SERVER_PASSWORD != '' }}
         uses: rasmusbuchholdt/simply-web-deploy@2.1.0
         with:
-          website-name: ${{ secrets.WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
+          website-name: ${{ env.WEBSITE_NAME }}
+          server-computer-name: ${{ env.SERVER_COMPUTER_NAME }}
+          server-username: ${{ env.SERVER_USERNAME }}
+          server-password: ${{ env.SERVER_PASSWORD }}
