@@ -1,0 +1,215 @@
+@model DiscoveryDetailsViewModel
+@{
+    ViewData["Title"] = string.IsNullOrWhiteSpace(Model.Title) ? "Title details" : Model.Title;
+    var typeLabel = Model.IsAnime ? "Anime" : Model.MediaType == "tv" ? "TV series" : "Movie";
+}
+
+@if (!Model.IsConfigured || !string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <section class="page-shell page-top">
+        <div class="catalog-setup-panel">
+            <div>
+                <span class="eyebrow">Legal discovery</span>
+                <h1>@(Model.IsConfigured ? "Title unavailable" : "Connect TMDB")</h1>
+                <p>@Model.ErrorMessage</p>
+            </div>
+            <a class="button button-primary" asp-controller="Discover" asp-action="Index">Back to discovery</a>
+        </div>
+    </section>
+}
+else
+{
+    <section class="discovery-details-hero" style="--catalog-backdrop: url('@Model.BackdropUrl')">
+        <div class="discovery-details-shade"></div>
+        <div class="page-shell discovery-details-content">
+            <img class="discovery-details-poster" src="@Model.PosterUrl" alt="@Model.Title poster" />
+            <div class="discovery-details-copy">
+                <span class="eyebrow">@typeLabel</span>
+                <h1>@Model.Title</h1>
+                @if (!string.Equals(Model.Title, Model.OriginalTitle, StringComparison.OrdinalIgnoreCase))
+                {
+                    <p class="original-title">@Model.OriginalTitle</p>
+                }
+                <div class="hero-meta">
+                    <span class="match">★ @Model.Rating.ToString("0.0")</span>
+                    <span>@Model.ReleaseYear</span>
+                    @if (Model.RuntimeMinutes > 0)
+                    {
+                        <span>@Model.RuntimeMinutes min</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Status))
+                    {
+                        <span class="rating-box">@Model.Status</span>
+                    }
+                    @if (Model.Genres.Count > 0)
+                    {
+                        <span>@string.Join(" · ", Model.Genres)</span>
+                    }
+                </div>
+                <p>@Model.Overview</p>
+                <div class="hero-actions">
+                    @if (!string.IsNullOrWhiteSpace(Model.TrailerEmbedUrl))
+                    {
+                        <a class="button button-light" href="#trailer">▶ Official trailer</a>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.ProviderLink))
+                    {
+                        <a class="button button-primary" href="@Model.ProviderLink" target="_blank" rel="noopener noreferrer">Where to watch ↗</a>
+                    }
+                    <a class="button button-glass" href="@Model.TmdbUrl" target="_blank" rel="noopener noreferrer">View on TMDB ↗</a>
+                    @if (!string.IsNullOrWhiteSpace(Model.HomepageUrl))
+                    {
+                        <a class="button button-glass" href="@Model.HomepageUrl" target="_blank" rel="noopener noreferrer">Official site ↗</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="page-shell discovery-details-main">
+        <section class="provider-panel">
+            <div class="provider-heading">
+                <div>
+                    <span class="eyebrow">Authorised availability</span>
+                    <h2>Where to watch in @Model.Region</h2>
+                </div>
+                <form asp-controller="Discover" asp-action="Details" asp-route-type="@Model.MediaType" asp-route-id="@Model.Id" method="get">
+                    <select name="region" onchange="this.form.submit()" aria-label="Change provider region">
+                        <option value="BD" selected="@(Model.Region == "BD" ? "selected" : null)">Bangladesh</option>
+                        <option value="US" selected="@(Model.Region == "US" ? "selected" : null)">United States</option>
+                        <option value="GB" selected="@(Model.Region == "GB" ? "selected" : null)">United Kingdom</option>
+                        <option value="IN" selected="@(Model.Region == "IN" ? "selected" : null)">India</option>
+                        <option value="JP" selected="@(Model.Region == "JP" ? "selected" : null)">Japan</option>
+                        <option value="CA" selected="@(Model.Region == "CA" ? "selected" : null)">Canada</option>
+                        <option value="AU" selected="@(Model.Region == "AU" ? "selected" : null)">Australia</option>
+                    </select>
+                </form>
+            </div>
+
+            @if (Model.StreamProviders.Count == 0 && Model.RentProviders.Count == 0 && Model.BuyProviders.Count == 0)
+            {
+                <div class="provider-empty">
+                    <p>No provider listing is currently available for this title in @Model.Region. Try another country or open the TMDB page.</p>
+                </div>
+            }
+            else
+            {
+                @if (Model.StreamProviders.Count > 0)
+                {
+                    <div class="provider-group">
+                        <h3>Stream</h3>
+                        <div class="provider-list">
+                            @foreach (var provider in Model.StreamProviders)
+                            {
+                                <a href="@Model.ProviderLink" target="_blank" rel="noopener noreferrer" title="Open legal provider options">
+                                    <img src="@provider.LogoUrl" alt="@provider.Name" />
+                                    <span>@provider.Name</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                @if (Model.RentProviders.Count > 0)
+                {
+                    <div class="provider-group">
+                        <h3>Rent</h3>
+                        <div class="provider-list">
+                            @foreach (var provider in Model.RentProviders)
+                            {
+                                <a href="@Model.ProviderLink" target="_blank" rel="noopener noreferrer">
+                                    <img src="@provider.LogoUrl" alt="@provider.Name" />
+                                    <span>@provider.Name</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                @if (Model.BuyProviders.Count > 0)
+                {
+                    <div class="provider-group">
+                        <h3>Buy</h3>
+                        <div class="provider-list">
+                            @foreach (var provider in Model.BuyProviders)
+                            {
+                                <a href="@Model.ProviderLink" target="_blank" rel="noopener noreferrer">
+                                    <img src="@provider.LogoUrl" alt="@provider.Name" />
+                                    <span>@provider.Name</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            <p class="justwatch-credit">Streaming availability data supplied by JustWatch via TMDB. Provider availability can vary by country and date.</p>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(Model.TrailerEmbedUrl))
+        {
+            <section class="catalog-section" id="trailer">
+                <div class="section-heading">
+                    <div><span class="eyebrow">Official video</span><h2>@Model.TrailerName</h2></div>
+                </div>
+                <div class="legal-trailer-shell">
+                    <iframe src="@Model.TrailerEmbedUrl"
+                            title="@Model.Title official trailer"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allowfullscreen></iframe>
+                </div>
+                <p class="legal-playback-note">This is an official promotional video. StreamNova does not host an unlicensed copy of the commercial title.</p>
+            </section>
+        }
+
+        @if (Model.Seasons.Count > 0)
+        {
+            <section class="catalog-section">
+                <div class="section-heading">
+                    <div><span class="eyebrow">Episode guide</span><h2>Seasons</h2></div>
+                    <span>@Model.Seasons.Sum(season => season.EpisodeCount) episodes listed</span>
+                </div>
+                <div class="season-grid">
+                    @foreach (var season in Model.Seasons)
+                    {
+                        <article class="season-card">
+                            <img src="@season.PosterUrl" alt="@season.Name poster" loading="lazy" />
+                            <div>
+                                <span class="eyebrow">@season.AirYear</span>
+                                <h3>@season.Name</h3>
+                                <strong>@season.EpisodeCount episodes</strong>
+                                @if (!string.IsNullOrWhiteSpace(season.Overview))
+                                {
+                                    <p>@season.Overview</p>
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (Model.Cast.Count > 0)
+        {
+            <section class="catalog-section">
+                <div class="section-heading"><div><span class="eyebrow">People</span><h2>Top cast</h2></div></div>
+                <div class="cast-rail">
+                    @foreach (var person in Model.Cast)
+                    {
+                        <article class="cast-card">
+                            <img src="@person.ProfileUrl" alt="@person.Name" loading="lazy" />
+                            <strong>@person.Name</strong>
+                            <span>@person.Character</span>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+
+        <aside class="tmdb-credit-card">
+            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg" alt="TMDB" />
+            <div>
+                <strong>Metadata and images from TMDB</strong>
+                <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+            </div>
+        </aside>
+    </main>
+}

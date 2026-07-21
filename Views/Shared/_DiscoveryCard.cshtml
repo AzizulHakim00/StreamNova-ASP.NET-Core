@@ -1,0 +1,19 @@
+@model DiscoveryTitleViewModel
+<article class="discovery-card">
+    <a class="discovery-card-poster"
+       asp-controller="Discover"
+       asp-action="Details"
+       asp-route-type="@Model.MediaType"
+       asp-route-id="@Model.Id">
+        <img src="@Model.PosterUrl" alt="@Model.Title poster" loading="lazy" />
+        <span class="discovery-card-play">▶</span>
+        <span class="discovery-media-badge">@(Model.IsAnime ? "Anime" : Model.MediaType == "tv" ? "TV" : "Movie")</span>
+    </a>
+    <div class="discovery-card-body">
+        <h3 title="@Model.Title">@Model.Title</h3>
+        <div class="discovery-card-meta">
+            <span>@Model.ReleaseYear</span>
+            <span>★ @Model.Rating.ToString("0.0")</span>
+        </div>
+    </div>
+</article>

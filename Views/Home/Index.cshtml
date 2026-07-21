@@ -15,7 +15,7 @@ else
     <section class="hero" style="--hero-image: url('@Model.Featured.BackdropPath')">
         <div class="hero-shade"></div>
         <div class="hero-content page-shell">
-            <span class="eyebrow">StreamNova Original Pick</span>
+            <span class="eyebrow">StreamNova Open Cinema</span>
             <h1>@Model.Featured.Title</h1>
             <div class="hero-meta">
                 <span class="match">@((int)(Model.Featured.Score * 10))% match</span>
@@ -27,6 +27,7 @@ else
             <div class="hero-actions">
                 <a class="button button-light" asp-controller="Browse" asp-action="Watch" asp-route-id="@Model.Featured.Id">▶ Play</a>
                 <a class="button button-glass" asp-controller="Browse" asp-action="Details" asp-route-id="@Model.Featured.Id">ⓘ More info</a>
+                <a class="button button-primary" asp-controller="Discover" asp-action="Index">Explore Movies, TV & Anime</a>
             </div>
         </div>
     </section>
@@ -64,9 +65,9 @@ else
                 <div class="section-heading">
                     <div>
                         <span class="eyebrow">Smart discovery</span>
-                        <h2>Recommended for you</h2>
+                        <h2>Recommended open movies</h2>
                     </div>
-                    <a asp-controller="Browse" asp-action="Index">See more →</a>
+                    <a asp-controller="Discover" asp-action="Index">Global catalog →</a>
                 </div>
                 <div class="movie-rail" data-rail>
                     @foreach (var movie in Model.Recommended)
@@ -79,8 +80,8 @@ else
 
         <section class="content-row">
             <div class="section-heading">
-                <h2>Trending now</h2>
-                <a asp-controller="Browse" asp-action="Index">Explore all →</a>
+                <h2>Trending open movies</h2>
+                <a asp-controller="Discover" asp-action="Index">Movies & TV →</a>
             </div>
             <div class="movie-rail" data-rail>
                 @foreach (var movie in Model.Trending)

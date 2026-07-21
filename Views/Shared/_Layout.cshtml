@@ -4,13 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - StreamNova</title>
-    <meta name="description" content="StreamNova is a full-featured Netflix-inspired ASP.NET Core streaming platform demo." />
+    <meta name="description" content="StreamNova is a legal movie, TV and anime discovery platform with official trailers, open-license playback and authorised provider links." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/platform.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/playback.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/discover.css" asp-append-version="true" />
 </head>
 <body>
 <header class="site-header" id="siteHeader">
@@ -19,7 +20,8 @@
     </a>
     <nav class="main-nav" aria-label="Main navigation">
         <a asp-controller="Home" asp-action="Index">Home</a>
-        <a asp-controller="Browse" asp-action="Index">Browse</a>
+        <a asp-controller="Discover" asp-action="Index">Movies & TV</a>
+        <a asp-controller="Browse" asp-action="Index">Open Movies</a>
         @if (User.Identity?.IsAuthenticated == true)
         {
             <a asp-controller="Watchlist" asp-action="Index">My List</a>
@@ -32,8 +34,10 @@
         }
     </nav>
     <div class="header-actions">
-        <form class="header-search" asp-controller="Browse" asp-action="Index" method="get">
-            <input type="search" name="q" placeholder="Titles, genres..." aria-label="Search movies" />
+        <form class="header-search" asp-controller="Discover" asp-action="Search" method="get">
+            <input type="hidden" name="type" value="all" />
+            <input type="hidden" name="region" value="BD" />
+            <input type="search" name="q" placeholder="Movies, TV, anime..." aria-label="Search movies TV and anime" required />
             <button type="submit" aria-label="Search">⌕</button>
         </form>
         @if (User.Identity?.IsAuthenticated == true)
@@ -78,14 +82,16 @@
 <footer class="site-footer">
     <div>
         <a class="brand brand-footer" asp-controller="Home" asp-action="Index"><span class="brand-mark">S</span><span>StreamNova</span></a>
-        <p>Streaming discovery, subscriptions, support, and content operations built with ASP.NET Core.</p>
+        <p>Legal discovery, official trailers, open-license playback and authorised streaming-provider links.</p>
+        <small>This product uses the TMDB API but is not endorsed or certified by TMDB. Availability data supplied by JustWatch.</small>
     </div>
     <div class="footer-links">
-        <a asp-controller="Browse" asp-action="Index">Browse</a>
+        <a asp-controller="Discover" asp-action="Index">Movies & TV</a>
+        <a asp-controller="Browse" asp-action="Index">Open Movies</a>
         <a asp-controller="Subscription" asp-action="Index">Plans</a>
         <a asp-controller="Support" asp-action="Index">Support</a>
+        <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">TMDB ↗</a>
         <a asp-controller="Home" asp-action="Privacy">Privacy</a>
-        <a asp-controller="Account" asp-action="Profile">Account</a>
     </div>
 </footer>
 

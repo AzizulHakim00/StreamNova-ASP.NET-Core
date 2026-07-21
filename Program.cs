@@ -19,6 +19,13 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddHealthChecks();
 builder.Services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<TmdbService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.themoviedb.org/3/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("StreamNova/1.0 (+https://streamnova.runasp.net)");
+});
 
 builder.Services.AddSingleton<JsonDatabase>();
 builder.Services.AddSingleton<PasswordService>();
