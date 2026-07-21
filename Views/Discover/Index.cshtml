@@ -1,0 +1,126 @@
+@model DiscoveryHomeViewModel
+@{
+    ViewData["Title"] = "Movies, TV & Anime";
+}
+
+<section class="discover-hero">
+    <div class="discover-hero-shade"></div>
+    <div class="page-shell discover-hero-content">
+        <span class="eyebrow">Legal global discovery</span>
+        <h1>Movies, TV<br />and anime.</h1>
+        <p>Explore a live catalog, play official trailers, inspect seasons and cast, and find authorised streaming, rental and purchase providers in your region.</p>
+        <form class="discover-search" asp-controller="Discover" asp-action="Search" method="get">
+            <input type="search" name="q" placeholder="Search movies, series or anime..." aria-label="Search the legal catalog" required />
+            <select name="type" aria-label="Content type">
+                <option value="all">Everything</option>
+                <option value="movie">Movies</option>
+                <option value="tv">TV shows</option>
+                <option value="anime">Anime</option>
+            </select>
+            <select name="region" aria-label="Provider region">
+                <option value="BD" selected="@(Model.Region == "BD")">Bangladesh</option>
+                <option value="US" selected="@(Model.Region == "US")">United States</option>
+                <option value="GB" selected="@(Model.Region == "GB")">United Kingdom</option>
+                <option value="IN" selected="@(Model.Region == "IN")">India</option>
+                <option value="JP" selected="@(Model.Region == "JP")">Japan</option>
+                <option value="CA" selected="@(Model.Region == "CA")">Canada</option>
+                <option value="AU" selected="@(Model.Region == "AU")">Australia</option>
+            </select>
+            <button class="button button-primary" type="submit">Search</button>
+        </form>
+        <div class="discover-hero-actions">
+            <a class="button button-light" asp-controller="Browse" asp-action="Index">▶ Full open movies</a>
+            <a class="button button-glass" href="#trending">Browse catalog</a>
+        </div>
+    </div>
+</section>
+
+<section class="page-shell discover-catalog" id="trending">
+    @if (!Model.IsConfigured)
+    {
+        <div class="catalog-setup-panel">
+            <div>
+                <span class="eyebrow">One-time setup required</span>
+                <h2>Connect your free TMDB token</h2>
+                <p>The complete legal catalog is already built. Add the server environment variable <code>TMDB_READ_ACCESS_TOKEN</code> to activate live movies, TV, anime, trailers and provider data.</p>
+            </div>
+            <a class="button button-primary" href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer">Get TMDB token ↗</a>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert-error">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.Trending.Count > 0)
+    {
+        <section class="discovery-row">
+            <div class="section-heading">
+                <div><span class="eyebrow">This week</span><h2>Trending now</h2></div>
+                <a asp-controller="Discover" asp-action="Search" asp-route-type="all" asp-route-region="@Model.Region" asp-route-q="trending">Explore</a>
+            </div>
+            <div class="discovery-rail">
+                @foreach (var title in Model.Trending)
+                {
+                    <partial name="_DiscoveryCard" model="title" />
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.Movies.Count > 0)
+    {
+        <section class="discovery-row">
+            <div class="section-heading">
+                <div><span class="eyebrow">Popular</span><h2>Movies</h2></div>
+                <a asp-controller="Discover" asp-action="Search" asp-route-type="movie" asp-route-region="@Model.Region" asp-route-q="movie">Search movies</a>
+            </div>
+            <div class="discovery-rail">
+                @foreach (var title in Model.Movies)
+                {
+                    <partial name="_DiscoveryCard" model="title" />
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.TvShows.Count > 0)
+    {
+        <section class="discovery-row">
+            <div class="section-heading">
+                <div><span class="eyebrow">Binge-worthy</span><h2>TV shows</h2></div>
+                <a asp-controller="Discover" asp-action="Search" asp-route-type="tv" asp-route-region="@Model.Region" asp-route-q="series">Search TV</a>
+            </div>
+            <div class="discovery-rail">
+                @foreach (var title in Model.TvShows)
+                {
+                    <partial name="_DiscoveryCard" model="title" />
+                }
+            </div>
+        </section>
+    }
+
+    @if (Model.Anime.Count > 0)
+    {
+        <section class="discovery-row">
+            <div class="section-heading">
+                <div><span class="eyebrow">From Japan</span><h2>Popular anime</h2></div>
+                <a asp-controller="Discover" asp-action="Search" asp-route-type="anime" asp-route-region="@Model.Region" asp-route-q="anime">Search anime</a>
+            </div>
+            <div class="discovery-rail">
+                @foreach (var title in Model.Anime)
+                {
+                    <partial name="_DiscoveryCard" model="title" />
+                }
+            </div>
+        </section>
+    }
+
+    <aside class="tmdb-credit-card">
+        <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg" alt="TMDB" />
+        <div>
+            <strong>Catalog metadata powered by TMDB</strong>
+            <p>This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming availability data is supplied by JustWatch and links to authorised provider pages.</p>
+        </div>
+    </aside>
+</section>
