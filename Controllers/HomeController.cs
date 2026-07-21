@@ -9,11 +9,16 @@ public sealed class HomeController : Controller
 {
     private readonly MovieService _movieService;
     private readonly UserMovieService _userMovieService;
+    private readonly RecommendationService _recommendationService;
 
-    public HomeController(MovieService movieService, UserMovieService userMovieService)
+    public HomeController(
+        MovieService movieService,
+        UserMovieService userMovieService,
+        RecommendationService recommendationService)
     {
         _movieService = movieService;
         _userMovieService = userMovieService;
+        _recommendationService = recommendationService;
     }
 
     public async Task<IActionResult> Index()
@@ -35,6 +40,14 @@ public sealed class HomeController : Controller
         if (TryGetUserId(out var userId))
         {
             model.ContinueWatching = await _userMovieService.GetContinueWatchingAsync(userId);
+            model.Recommended = await _recommendationService.GetForUserAsync(userId);
+        }
+        else
+        {
+            model.Recommended = movies
+                .OrderByDescending(movie => movie.Score)
+                .Take(10)
+                .ToList();
         }
 
         return View(model);
