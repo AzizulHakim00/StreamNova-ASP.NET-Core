@@ -52,6 +52,21 @@ function setupWatchPage() {
     };
 
     if (video) {
+        const hlsSource = video.dataset.hlsSource;
+        let hls = null;
+
+        if (hlsSource) {
+            if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = hlsSource;
+            } else if (window.Hls?.isSupported()) {
+                hls = new window.Hls();
+                hls.loadSource(hlsSource);
+                hls.attachMedia(video);
+            } else {
+                video.insertAdjacentHTML('afterend', '<p class="player-error">This browser cannot play this HLS stream.</p>');
+            }
+        }
+
         video.addEventListener('loadedmetadata', () => {
             if (resumeAt > 0 && resumeAt < video.duration - 10) {
                 video.currentTime = resumeAt;
@@ -59,7 +74,10 @@ function setupWatchPage() {
             }
         });
         video.addEventListener('timeupdate', () => saveProgress(video.currentTime, video.duration));
-        window.addEventListener('beforeunload', () => saveProgress(video.currentTime, video.duration));
+        window.addEventListener('beforeunload', () => {
+            saveProgress(video.currentTime, video.duration);
+            hls?.destroy();
+        });
         return;
     }
 
