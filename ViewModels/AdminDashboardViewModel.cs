@@ -9,5 +9,8 @@ public sealed class AdminDashboardViewModel
     public int WatchlistAdds { get; set; }
     public int ActiveProgressItems { get; set; }
     public int TotalReviews { get; set; }
+    public int ActiveSubscriptions { get; set; }
+    public decimal MonthlyRecurringRevenue { get; set; }
+    public int OpenSupportTickets { get; set; }
     public IReadOnlyList<Movie> LatestMovies { get; set; } = [];
 }
