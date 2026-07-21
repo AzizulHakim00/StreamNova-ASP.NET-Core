@@ -1,0 +1,68 @@
+@model SubscriptionPageViewModel
+@{
+    ViewData["Title"] = "Plans";
+}
+<section class="page-shell page-top platform-page">
+    <div class="platform-hero-copy">
+        <span class="eyebrow">Membership</span>
+        <h1>Choose how you stream</h1>
+        <p>Switch plans at any time. This demo records subscription state locally and creates account notifications for every change.</p>
+    </div>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert-success">@success</div>
+    }
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert-error">@error</div>
+    }
+
+    @if (Model.CurrentSubscription is not null && Model.CurrentPlan is not null)
+    {
+        <article class="current-plan-card">
+            <div>
+                <span class="status-dot"></span>
+                <strong>@Model.CurrentPlan.Name</strong>
+                <p>@Model.CurrentSubscription.Status · renews @Model.CurrentSubscription.RenewsAtUtc.ToString("dd MMM yyyy")</p>
+            </div>
+            @if (Model.CurrentSubscription.Status == SubscriptionStatuses.Active)
+            {
+                <form asp-action="Cancel" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="button button-glass" type="submit">Cancel plan</button>
+                </form>
+            }
+        </article>
+    }
+
+    <div class="plan-grid">
+        @foreach (var plan in Model.Plans)
+        {
+            var selected = Model.CurrentSubscription?.PlanId == plan.Id && Model.CurrentSubscription.Status == SubscriptionStatuses.Active;
+            <article class="plan-card @(plan.IsPopular ? "plan-popular" : "") @(selected ? "plan-selected" : "")">
+                @if (plan.IsPopular)
+                {
+                    <span class="plan-ribbon">Most popular</span>
+                }
+                <span class="plan-quality">@plan.VideoQuality</span>
+                <h2>@plan.Name</h2>
+                <p>@plan.Description</p>
+                <div class="plan-price"><strong>$@plan.MonthlyPrice.ToString("0.00")</strong><span>/ month</span></div>
+                <ul>
+                    @foreach (var feature in plan.Features)
+                    {
+                        <li>✓ @feature</li>
+                    }
+                </ul>
+                <form asp-action="Choose" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="planId" value="@plan.Id" />
+                    <button class="button @(selected ? "button-glass" : "button-primary") button-block" type="submit" disabled="@selected">
+                        @(selected ? "Current plan" : "Choose plan")
+                    </button>
+                </form>
+            </article>
+        }
+    </div>
+</section>
