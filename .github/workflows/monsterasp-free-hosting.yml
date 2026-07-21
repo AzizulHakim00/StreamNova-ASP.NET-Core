@@ -8,12 +8,12 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: streamnova-production
+  cancel-in-progress: true
+
 env:
   DOTNET_VERSION: 10.0.x
-  MONSTER_WEBSITE_NAME: ${{ secrets.MONSTER_WEBSITE_NAME }}
-  MONSTER_SERVER_COMPUTER_NAME: ${{ secrets.MONSTER_SERVER_COMPUTER_NAME }}
-  MONSTER_SERVER_USERNAME: ${{ secrets.MONSTER_SERVER_USERNAME }}
-  MONSTER_SERVER_PASSWORD: ${{ secrets.MONSTER_SERVER_PASSWORD }}
 
 jobs:
   build-and-deploy:
@@ -65,10 +65,10 @@ jobs:
           retention-days: 30
 
       - name: Deploy through WebDeploy
-        if: ${{ env.MONSTER_WEBSITE_NAME != '' && env.MONSTER_SERVER_COMPUTER_NAME != '' && env.MONSTER_SERVER_USERNAME != '' && env.MONSTER_SERVER_PASSWORD != '' }}
+        if: ${{ secrets.WEBSITE_NAME != '' && secrets.SERVER_COMPUTER_NAME != '' && secrets.SERVER_USERNAME != '' && secrets.SERVER_PASSWORD != '' }}
         uses: rasmusbuchholdt/simply-web-deploy@2.1.0
         with:
-          website-name: ${{ env.MONSTER_WEBSITE_NAME }}
-          server-computer-name: ${{ env.MONSTER_SERVER_COMPUTER_NAME }}
-          server-username: ${{ env.MONSTER_SERVER_USERNAME }}
-          server-password: ${{ env.MONSTER_SERVER_PASSWORD }}
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
