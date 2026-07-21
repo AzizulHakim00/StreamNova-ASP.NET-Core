@@ -30,8 +30,20 @@ public sealed class Movie
     [Required, StringLength(300)]
     public string BackdropPath { get; set; } = string.Empty;
 
-    [Url, StringLength(500)]
+    [Url, StringLength(1000)]
     public string? VideoUrl { get; set; }
+
+    [StringLength(80)]
+    public string? PlaybackLabel { get; set; }
+
+    [StringLength(160)]
+    public string? SourceCredit { get; set; }
+
+    [Url, StringLength(1000)]
+    public string? SourcePageUrl { get; set; }
+
+    [StringLength(100)]
+    public string? LicenseLabel { get; set; }
 
     [Range(0, 10)]
     public double Score { get; set; }
