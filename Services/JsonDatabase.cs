@@ -128,14 +128,19 @@ public sealed class JsonDatabase
 
     private static List<Movie> BuildInitialMovies()
     {
-        var movies = PlayableCatalogMigration.BuildOpenMovies();
-        movies.AddRange(SeedMovies());
-        for (var index = 0; index < movies.Count; index++)
+        var state = new DatabaseState
         {
-            movies[index].Id = index + 1;
+            Movies = PlayableCatalogMigration.BuildOpenMovies()
+        };
+        state.Movies.AddRange(SeedMovies());
+        PlayableCatalogMigration.Apply(state);
+
+        for (var index = 0; index < state.Movies.Count; index++)
+        {
+            state.Movies[index].Id = index + 1;
         }
 
-        return movies;
+        return state.Movies;
     }
 
     private static List<Movie> SeedMovies() =>

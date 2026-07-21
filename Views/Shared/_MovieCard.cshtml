@@ -1,11 +1,16 @@
 @model Movie
+@{
+    var playbackBadge = Model.PlaybackLabel?.Contains("Full", StringComparison.OrdinalIgnoreCase) == true
+        ? "Full movie"
+        : "Trailer";
+}
 <article class="movie-card">
     <a class="movie-card-image" asp-controller="Browse" asp-action="Details" asp-route-id="@Model.Id">
         <img src="@Model.PosterPath" alt="@Model.Title poster" loading="lazy" />
         <span class="movie-card-play">▶</span>
         @if (!string.IsNullOrWhiteSpace(Model.VideoUrl))
         {
-            <span class="playable-badge">Playable</span>
+            <span class="playable-badge">@playbackBadge</span>
         }
     </a>
     <div class="movie-card-body">

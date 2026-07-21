@@ -74,7 +74,6 @@ public sealed class BrowseController : Controller
         return View(model);
     }
 
-    [Authorize]
     public async Task<IActionResult> Watch(int id)
     {
         var movie = await _movieService.GetAsync(id);

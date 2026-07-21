@@ -3,6 +3,8 @@
     ViewData["Title"] = $"Watching {Model.Movie.Title}";
     var isEmbedded = Model.PlaybackKind == "youtube" || Model.PlaybackKind == "vimeo";
     var isHtmlVideo = Model.PlaybackKind == "direct" || Model.PlaybackKind == "hls";
+    var isPreview = Model.Movie.PlaybackLabel?.Contains("trailer", StringComparison.OrdinalIgnoreCase) == true;
+    var canSaveProgress = User.Identity?.IsAuthenticated == true;
 }
 
 @if (Model.PlaybackKind == "hls")
@@ -23,7 +25,7 @@
         <div class="watch-source-group">
             @if (!string.IsNullOrWhiteSpace(Model.Movie.SourcePageUrl))
             {
-                <a href="@Model.Movie.SourcePageUrl" target="_blank" rel="noopener noreferrer">Source ↗</a>
+                <a href="@Model.Movie.SourcePageUrl" target="_blank" rel="noopener noreferrer">Official page ↗</a>
             }
             <span>@Model.Movie.MaturityRating</span>
         </div>
@@ -67,6 +69,14 @@
         }
     </div>
 
+    @if (isPreview)
+    {
+        <div class="preview-notice">
+            <strong>Official preview</strong>
+            <span>The full commercial movie is not hosted by StreamNova. Use the official-page link to find authorised viewing options.</span>
+        </div>
+    }
+
     @if (!string.IsNullOrWhiteSpace(Model.Movie.SourceCredit) || !string.IsNullOrWhiteSpace(Model.Movie.LicenseLabel))
     {
         <aside class="playback-credit">
@@ -84,7 +94,7 @@
 @section Scripts {
     <script>
         window.streamNovaWatch = {
-            saveUrl: '@Url.Action("SaveProgress", "Browse", new { id = Model.Movie.Id })'
+            saveUrl: '@(canSaveProgress ? Url.Action("SaveProgress", "Browse", new { id = Model.Movie.Id }) : string.Empty)'
         };
     </script>
 }

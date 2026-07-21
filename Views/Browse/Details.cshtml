@@ -2,6 +2,8 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = Model.Movie.Title;
+    var isFullMovie = Model.Movie.PlaybackLabel?.Contains("Full", StringComparison.OrdinalIgnoreCase) == true;
+    var playLabel = isFullMovie ? "▶ Watch full movie" : "▶ Play trailer";
     var ratingOptions = Enumerable.Range(1, 5)
         .Reverse()
         .Select(value => new SelectListItem($"{value} star{(value == 1 ? "" : "s")}", value.ToString())
@@ -20,6 +22,10 @@
             <span>@Model.Movie.Year</span>
             <span class="rating-box">@Model.Movie.MaturityRating</span>
             <span>@Model.Movie.DurationMinutes min</span>
+            @if (!string.IsNullOrWhiteSpace(Model.Movie.PlaybackLabel))
+            {
+                <span class="rating-box">@Model.Movie.PlaybackLabel</span>
+            }
             @if (Model.ReviewCount > 0)
             {
                 <span class="viewer-rating">★ @Model.AverageReviewRating / 5</span>
@@ -27,7 +33,11 @@
         </div>
         <p>@Model.Movie.Synopsis</p>
         <div class="hero-actions">
-            <a class="button button-light" asp-action="Watch" asp-route-id="@Model.Movie.Id">@(Model.ResumeSeconds > 0 ? "▶ Resume" : "▶ Play")</a>
+            <a class="button button-light" asp-action="Watch" asp-route-id="@Model.Movie.Id">@(Model.ResumeSeconds > 0 && isFullMovie ? "▶ Resume" : playLabel)</a>
+            @if (!string.IsNullOrWhiteSpace(Model.Movie.SourcePageUrl))
+            {
+                <a class="button button-glass" href="@Model.Movie.SourcePageUrl" target="_blank" rel="noopener noreferrer">Official page ↗</a>
+            }
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <form asp-controller="Watchlist" asp-action="Toggle" method="post">
@@ -42,7 +52,7 @@
                 <a class="button button-glass" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path">+ My List</a>
             }
         </div>
-        @if (Model.ResumeSeconds > 0)
+        @if (Model.ResumeSeconds > 0 && isFullMovie)
         {
             <p class="resume-note">Saved at @(TimeSpan.FromSeconds(Model.ResumeSeconds).ToString(@"hh\:mm\:ss"))</p>
         }
