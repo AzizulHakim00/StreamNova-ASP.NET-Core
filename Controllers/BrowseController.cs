@@ -90,7 +90,15 @@ public sealed class BrowseController : Controller
             resumeSeconds = progress?.ProgressSeconds ?? 0;
         }
 
-        return View(new WatchViewModel { Movie = movie, ResumeSeconds = resumeSeconds });
+        var playback = VideoSourceResolver.Resolve(movie.VideoUrl);
+        return View(new WatchViewModel
+        {
+            Movie = movie,
+            ResumeSeconds = resumeSeconds,
+            PlaybackKind = playback.Kind,
+            PlaybackUrl = playback.Url,
+            PlaybackMimeType = playback.MimeType
+        });
     }
 
     [Authorize]
