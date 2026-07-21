@@ -1,0 +1,96 @@
+@model DiscoverySearchViewModel
+@{
+    ViewData["Title"] = string.IsNullOrWhiteSpace(Model.Query) ? "Search" : $"Search: {Model.Query}";
+}
+
+<section class="page-shell page-top discovery-search-page">
+    <div class="discovery-page-heading">
+        <div>
+            <span class="eyebrow">Movies · TV · Anime</span>
+            <h1>Find your next story.</h1>
+            <p>Official trailers, season information and authorised viewing providers—without unlicensed streams.</p>
+        </div>
+    </div>
+
+    <form class="discover-search discover-search-wide" asp-controller="Discover" asp-action="Search" method="get">
+        <input type="search" name="q" value="@Model.Query" placeholder="Search titles..." required autofocus />
+        <select name="type" aria-label="Content type">
+            <option value="all" selected="@(Model.Type == "all" ? "selected" : null)">Everything</option>
+            <option value="movie" selected="@(Model.Type == "movie" ? "selected" : null)">Movies</option>
+            <option value="tv" selected="@(Model.Type == "tv" ? "selected" : null)">TV shows</option>
+            <option value="anime" selected="@(Model.Type == "anime" ? "selected" : null)">Anime</option>
+        </select>
+        <select name="region" aria-label="Provider region">
+            <option value="BD" selected="@(Model.Region == "BD" ? "selected" : null)">Bangladesh</option>
+            <option value="US" selected="@(Model.Region == "US" ? "selected" : null)">United States</option>
+            <option value="GB" selected="@(Model.Region == "GB" ? "selected" : null)">United Kingdom</option>
+            <option value="IN" selected="@(Model.Region == "IN" ? "selected" : null)">India</option>
+            <option value="JP" selected="@(Model.Region == "JP" ? "selected" : null)">Japan</option>
+            <option value="CA" selected="@(Model.Region == "CA" ? "selected" : null)">Canada</option>
+            <option value="AU" selected="@(Model.Region == "AU" ? "selected" : null)">Australia</option>
+        </select>
+        <button class="button button-primary" type="submit">Search</button>
+    </form>
+
+    @if (!Model.IsConfigured)
+    {
+        <div class="catalog-setup-panel compact-setup">
+            <div>
+                <span class="eyebrow">Catalog not connected</span>
+                <h2>Add <code>TMDB_READ_ACCESS_TOKEN</code></h2>
+                <p>The feature is deployed, but the server needs your private TMDB token before live search can run.</p>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert-error">@Model.ErrorMessage</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.Query) && Model.Results.Count == 0)
+    {
+        <div class="empty-state">
+            <span class="status-code">⌕</span>
+            <h2>No matching titles</h2>
+            <p>Try a shorter title, another spelling, or switch the content type to Everything.</p>
+        </div>
+    }
+    else if (Model.Results.Count > 0)
+    {
+        <div class="discovery-results-heading">
+            <div>
+                <span class="eyebrow">Search results</span>
+                <h2>@Model.Query</h2>
+            </div>
+            <span>Page @Model.Page of @Model.TotalPages</span>
+        </div>
+        <div class="discovery-grid">
+            @foreach (var title in Model.Results)
+            {
+                <partial name="_DiscoveryCard" model="title" />
+            }
+        </div>
+
+        <nav class="catalog-pagination" aria-label="Search result pages">
+            @if (Model.Page > 1)
+            {
+                <a class="button button-glass"
+                   asp-controller="Discover"
+                   asp-action="Search"
+                   asp-route-q="@Model.Query"
+                   asp-route-type="@Model.Type"
+                   asp-route-region="@Model.Region"
+                   asp-route-page="@(Model.Page - 1)">← Previous</a>
+            }
+            @if (Model.Page < Model.TotalPages)
+            {
+                <a class="button button-primary"
+                   asp-controller="Discover"
+                   asp-action="Search"
+                   asp-route-q="@Model.Query"
+                   asp-route-type="@Model.Type"
+                   asp-route-region="@Model.Region"
+                   asp-route-page="@(Model.Page + 1)">Next →</a>
+            }
+        </nav>
+    }
+</section>
