@@ -54,6 +54,8 @@ StreamNova is an original Netflix-inspired streaming and content-operations plat
 - Built-in `/health` endpoint
 - Docker multi-stage build
 - GitHub Actions build validation
+- Free MonsterASP.NET Windows/IIS package and WebDeploy workflow
+- Azure App Service deployment workflow and guide
 - Render Blueprint through `render.yaml`
 - Configurable JSON data path through `STREAMNOVA_DATA_PATH`
 - Thread-safe local persistence with no external database dependency
@@ -68,7 +70,7 @@ StreamNova is an original Netflix-inspired streaming and content-operations plat
 - PBKDF2 password hashing using built-in .NET cryptography
 - Thread-safe JSON persistence
 - HTML, CSS, and JavaScript
-- Docker
+- IIS, Docker, and GitHub Actions deployment support
 
 ## Demo accounts
 
@@ -92,6 +94,17 @@ Open `http://localhost:5167`.
 
 On Windows, `run.bat` can also be used. Visual Studio users can open `StreamNova.csproj` and press **Ctrl+F5**.
 
+## Free ASP.NET deployment
+
+The recommended no-subscription option is MonsterASP.NET's free ASP.NET hosting. The repository includes:
+
+- IIS in-process hosting configuration
+- A Windows x86 framework-dependent publish package
+- A downloadable GitHub Actions ZIP artifact
+- Optional automatic WebDeploy publishing
+
+Follow `MONSTERASP_FREE_DEPLOYMENT.md` for the complete setup. After the four hosting secrets are configured, every push to `main` can automatically deploy the newest StreamNova version.
+
 ## Run with Docker
 
 ```bash
@@ -100,6 +113,10 @@ docker run --rm -p 8080:8080 streamnova
 ```
 
 Open `http://localhost:8080`. The health endpoint is available at `http://localhost:8080/health`.
+
+## Azure App Service deployment
+
+Azure deployment files remain available for accounts with an active Azure subscription. Follow `AZURE_DEPLOYMENT.md` for the complete setup.
 
 ## Deploy on Render
 
@@ -124,7 +141,7 @@ Runtime data is stored by default in:
 App_Data/streamnova.json
 ```
 
-The JSON state now includes users, movies, watchlists, playback progress, reviews, plans, subscriptions, notifications, and support tickets. Delete the generated file to reset the demo database.
+The JSON state includes users, movies, watchlists, playback progress, reviews, plans, subscriptions, notifications, and support tickets. Delete the generated file to reset the demo database. Back it up before a full manual deployment replacement.
 
 ## Project structure
 
@@ -137,7 +154,8 @@ StreamNova/
 ├── Views/             # Razor interfaces
 ├── wwwroot/           # styling, scripts, and artwork
 ├── App_Data/          # generated JSON database
-├── .github/workflows/
+├── scripts/           # hosting provisioning scripts
+├── .github/workflows/ # build and deployment pipelines
 ├── Dockerfile
 ├── render.yaml
 ├── Program.cs

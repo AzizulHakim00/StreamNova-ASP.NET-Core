@@ -1,0 +1,58 @@
+name: Build and deploy StreamNova to MonsterASP.NET
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 10.0.x
+  MONSTER_WEBSITE_NAME: ${{ secrets.MONSTER_WEBSITE_NAME }}
+  MONSTER_SERVER_COMPUTER_NAME: ${{ secrets.MONSTER_SERVER_COMPUTER_NAME }}
+  MONSTER_SERVER_USERNAME: ${{ secrets.MONSTER_SERVER_USERNAME }}
+  MONSTER_SERVER_PASSWORD: ${{ secrets.MONSTER_SERVER_PASSWORD }}
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore StreamNova.csproj
+
+      - name: Build
+        run: dotnet build StreamNova.csproj --configuration Release --no-restore
+
+      - name: Publish for Windows IIS
+        run: dotnet publish StreamNova.csproj --configuration Release --no-build --output ./publish --runtime win-x86 --self-contained false /p:UseAppHost=false
+
+      - name: Create upload package
+        shell: pwsh
+        run: Compress-Archive -Path ./publish/* -DestinationPath ./StreamNova-MonsterASP.zip -Force
+
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: streamnova-monsterasp-package
+          path: StreamNova-MonsterASP.zip
+          retention-days: 30
+
+      - name: Deploy through WebDeploy
+        if: ${{ env.MONSTER_WEBSITE_NAME != '' && env.MONSTER_SERVER_COMPUTER_NAME != '' && env.MONSTER_SERVER_USERNAME != '' && env.MONSTER_SERVER_PASSWORD != '' }}
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ env.MONSTER_WEBSITE_NAME }}
+          server-computer-name: ${{ env.MONSTER_SERVER_COMPUTER_NAME }}
+          server-username: ${{ env.MONSTER_SERVER_USERNAME }}
+          server-password: ${{ env.MONSTER_SERVER_PASSWORD }}
