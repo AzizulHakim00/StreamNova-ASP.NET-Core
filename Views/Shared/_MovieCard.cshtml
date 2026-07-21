@@ -3,6 +3,10 @@
     <a class="movie-card-image" asp-controller="Browse" asp-action="Details" asp-route-id="@Model.Id">
         <img src="@Model.PosterPath" alt="@Model.Title poster" loading="lazy" />
         <span class="movie-card-play">▶</span>
+        @if (!string.IsNullOrWhiteSpace(Model.VideoUrl))
+        {
+            <span class="playable-badge">Playable</span>
+        }
     </a>
     <div class="movie-card-body">
         <div class="movie-card-title-row">
