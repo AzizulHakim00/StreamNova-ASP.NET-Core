@@ -4,23 +4,32 @@ namespace StreamNova.Services;
 
 public static class PlayableCatalogMigration
 {
-    public const int SchemaVersion = 2;
+    public const int SchemaVersion = 3;
 
     public static void Apply(DatabaseState state)
     {
-        if (state.SchemaVersion >= SchemaVersion)
+        if (state.SchemaVersion < 2)
         {
-            return;
+            EnsureOpenMovies(state);
         }
 
+        if (state.SchemaVersion < 3)
+        {
+            EnsureOfficialPreviews(state);
+        }
+
+        state.SchemaVersion = SchemaVersion;
+    }
+
+    private static void EnsureOpenMovies(DatabaseState state)
+    {
         var nextId = state.Movies.Count == 0 ? 1 : state.Movies.Max(movie => movie.Id) + 1;
         var additions = BuildOpenMovies();
 
         for (var index = additions.Count - 1; index >= 0; index--)
         {
             var template = additions[index];
-            var existing = state.Movies.FirstOrDefault(movie =>
-                movie.Title.Equals(template.Title, StringComparison.OrdinalIgnoreCase));
+            var existing = FindMovie(state, template.Title);
 
             if (existing is null)
             {
@@ -29,15 +38,113 @@ public static class PlayableCatalogMigration
                 continue;
             }
 
-            existing.VideoUrl ??= template.VideoUrl;
-            existing.PlaybackLabel ??= template.PlaybackLabel;
-            existing.SourceCredit ??= template.SourceCredit;
-            existing.SourcePageUrl ??= template.SourcePageUrl;
-            existing.LicenseLabel ??= template.LicenseLabel;
+            ApplyPlaybackMetadata(existing, template);
+        }
+    }
+
+    private static void EnsureOfficialPreviews(DatabaseState state)
+    {
+        foreach (var preview in BuildOfficialPreviews())
+        {
+            var movie = FindMovie(state, preview.Title);
+            if (movie is null)
+            {
+                continue;
+            }
+
+            ApplyPlaybackMetadata(movie, preview);
+        }
+    }
+
+    private static Movie? FindMovie(DatabaseState state, string title) =>
+        state.Movies.FirstOrDefault(movie =>
+            movie.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+
+    private static void ApplyPlaybackMetadata(Movie target, Movie source)
+    {
+        if (string.IsNullOrWhiteSpace(target.VideoUrl))
+        {
+            target.VideoUrl = source.VideoUrl;
         }
 
-        state.SchemaVersion = SchemaVersion;
+        if (string.IsNullOrWhiteSpace(target.PlaybackLabel))
+        {
+            target.PlaybackLabel = source.PlaybackLabel;
+        }
+
+        if (string.IsNullOrWhiteSpace(target.SourceCredit))
+        {
+            target.SourceCredit = source.SourceCredit;
+        }
+
+        if (string.IsNullOrWhiteSpace(target.SourcePageUrl))
+        {
+            target.SourcePageUrl = source.SourcePageUrl;
+        }
+
+        if (string.IsNullOrWhiteSpace(target.LicenseLabel))
+        {
+            target.LicenseLabel = source.LicenseLabel;
+        }
     }
+
+    private static List<Movie> BuildOfficialPreviews() =>
+    [
+        new Movie
+        {
+            Title = "Interstellar",
+            VideoUrl = "https://www.youtube.com/watch?v=zSWdZVtXT7E",
+            PlaybackLabel = "Official trailer",
+            SourceCredit = "Warner Bros. UK & Ireland / Paramount Pictures",
+            SourcePageUrl = "https://www.paramountpictures.com/movies/interstellar",
+            LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
+        },
+        new Movie
+        {
+            Title = "Blade Runner 2049",
+            VideoUrl = "https://www.youtube.com/watch?v=gCcx85zbxz4",
+            PlaybackLabel = "Official trailer",
+            SourceCredit = "Warner Bros.",
+            SourcePageUrl = "https://www.youtube.com/watch?v=gCcx85zbxz4",
+            LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
+        },
+        new Movie
+        {
+            Title = "Shutter Island",
+            VideoUrl = "https://www.youtube.com/watch?v=v8yrZSkKxTA",
+            PlaybackLabel = "Official trailer",
+            SourceCredit = "Rotten Tomatoes Classic Trailers / Paramount Pictures",
+            SourcePageUrl = "https://www.paramountpictures.com/movies/shutter-island",
+            LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
+        },
+        new Movie
+        {
+            Title = "Fast X",
+            VideoUrl = "https://www.youtube.com/watch?v=SAhlmquynBY",
+            PlaybackLabel = "Official trailer",
+            SourceCredit = "Universal Pictures Canada",
+            SourcePageUrl = "https://www.fastxmovie.com/",
+            LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
+        },
+        new Movie
+        {
+            Title = "Barbie",
+            VideoUrl = "https://www.youtube.com/watch?v=pBk4NYhWNMM",
+            PlaybackLabel = "Official trailer",
+            SourceCredit = "Warner Bros.",
+            SourcePageUrl = "https://www.barbie-themovie.com/",
+            LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
+        },
+        new Movie
+        {
+            Title = "Spider-Man",
+            VideoUrl = "https://www.youtube.com/watch?v=t06RUxPbp_c",
+            PlaybackLabel = "Official trailer",
+            SourceCredit = "Sony Pictures Entertainment",
+            SourcePageUrl = "https://www.sonypictures.com/movies/spiderman",
+            LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
+        }
+    ];
 
     public static List<Movie> BuildOpenMovies() =>
     [
