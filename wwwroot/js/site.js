@@ -17,8 +17,24 @@
         });
     }
 
+    const headerSearch = document.querySelector('.header-search input');
+    document.addEventListener('keydown', event => {
+        if (event.key === '/' && headerSearch && !isTypingTarget(event.target)) {
+            event.preventDefault();
+            headerSearch.focus();
+            headerSearch.select();
+        }
+    });
+
     setupWatchPage();
 })();
+
+function isTypingTarget(target) {
+    return target instanceof HTMLInputElement
+        || target instanceof HTMLTextAreaElement
+        || target instanceof HTMLSelectElement
+        || target?.isContentEditable;
+}
 
 function setupWatchPage() {
     const watchPage = document.querySelector('[data-watch-page]');
@@ -27,13 +43,53 @@ function setupWatchPage() {
     const movieId = Number(watchPage.dataset.movieId || 0);
     const duration = Number(watchPage.dataset.duration || 1);
     const resumeAt = Math.max(0, Number(watchPage.dataset.resume || 0));
+    const nextUrl = watchPage.dataset.nextUrl || '';
+    const nextTitle = watchPage.dataset.nextTitle || '';
     const video = document.querySelector('#moviePlayer');
     const token = document.querySelector('#progressTokenForm input[name="__RequestVerificationToken"]')?.value || '';
+    const speedSelect = document.querySelector('[data-playback-speed]');
+    const pipButton = document.querySelector('[data-picture-in-picture]');
+    const theaterButton = document.querySelector('[data-theater-mode]');
+    const shareButton = document.querySelector('[data-share-watch]');
+    const nextCard = document.querySelector('[data-next-title-card]');
+    const nextCountdown = document.querySelector('[data-next-countdown]');
+    const cancelNext = document.querySelector('[data-cancel-next]');
+    const toast = document.querySelector('[data-watch-toast]');
     let lastSaved = 0;
+    let nextTimer = null;
+    let nextSeconds = 8;
+
+    const showToast = message => {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.hidden = false;
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(() => { toast.hidden = true; }, 2400);
+    };
+
+    const saveGuestProgress = (progress, total) => {
+        if (window.streamNovaWatch?.saveUrl) return;
+        const state = JSON.parse(localStorage.getItem('streamnova-guest-progress') || '{}');
+        state[movieId] = {
+            progress: Math.floor(progress),
+            duration: Math.floor(total || duration),
+            updatedAt: Date.now()
+        };
+        localStorage.setItem('streamnova-guest-progress', JSON.stringify(state));
+    };
+
+    const getGuestResume = () => {
+        if (window.streamNovaWatch?.saveUrl || resumeAt > 0) return resumeAt;
+        const state = JSON.parse(localStorage.getItem('streamnova-guest-progress') || '{}');
+        return Math.max(0, Number(state[movieId]?.progress || 0));
+    };
 
     const saveProgress = async (progress, total) => {
-        if (!window.streamNovaWatch?.saveUrl || Math.abs(progress - lastSaved) < 10) return;
+        if (Math.abs(progress - lastSaved) < 10) return;
         lastSaved = progress;
+        saveGuestProgress(progress, total);
+        if (!window.streamNovaWatch?.saveUrl) return;
+
         const body = new URLSearchParams({
             id: String(movieId),
             progressSeconds: String(Math.floor(progress)),
@@ -51,6 +107,50 @@ function setupWatchPage() {
         }
     };
 
+    const cancelAutoNext = () => {
+        if (nextTimer) clearInterval(nextTimer);
+        nextTimer = null;
+        if (nextCard) nextCard.hidden = true;
+        showToast('Auto-next cancelled');
+    };
+
+    const startAutoNext = () => {
+        if (!nextUrl || !nextCard || nextTimer) return;
+        nextSeconds = 8;
+        nextCountdown.textContent = String(nextSeconds);
+        nextCard.hidden = false;
+        nextTimer = setInterval(() => {
+            nextSeconds -= 1;
+            nextCountdown.textContent = String(nextSeconds);
+            if (nextSeconds <= 0) {
+                clearInterval(nextTimer);
+                window.location.assign(nextUrl);
+            }
+        }, 1000);
+    };
+
+    cancelNext?.addEventListener('click', cancelAutoNext);
+
+    theaterButton?.addEventListener('click', () => {
+        watchPage.classList.toggle('theater-mode');
+        theaterButton.classList.toggle('active', watchPage.classList.contains('theater-mode'));
+        showToast(watchPage.classList.contains('theater-mode') ? 'Theater mode on' : 'Theater mode off');
+    });
+
+    shareButton?.addEventListener('click', async () => {
+        const shareData = { title: document.title, text: `Watch ${document.title.replace('Watching ', '')} on StreamNova`, url: window.location.href };
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                showToast('Watch link copied');
+            }
+        } catch {
+            // The visitor can cancel the operating-system share sheet.
+        }
+    });
+
     if (video) {
         const hlsSource = video.dataset.hlsSource;
         let hls = null;
@@ -67,60 +167,87 @@ function setupWatchPage() {
             }
         }
 
+        speedSelect?.addEventListener('change', () => {
+            video.playbackRate = Number(speedSelect.value || 1);
+            showToast(`Playback speed ${speedSelect.value}×`);
+        });
+
+        pipButton?.addEventListener('click', async () => {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else if (document.pictureInPictureEnabled) {
+                    await video.requestPictureInPicture();
+                } else {
+                    showToast('Picture in picture is not supported');
+                }
+            } catch {
+                showToast('Picture in picture is unavailable');
+            }
+        });
+
         video.addEventListener('loadedmetadata', () => {
-            if (resumeAt > 0 && resumeAt < video.duration - 10) {
-                video.currentTime = resumeAt;
-                lastSaved = resumeAt;
+            const storedResume = getGuestResume();
+            if (storedResume > 0 && storedResume < video.duration - 10) {
+                video.currentTime = storedResume;
+                lastSaved = storedResume;
+                showToast(`Resumed at ${formatClock(storedResume)}`);
             }
         });
         video.addEventListener('timeupdate', () => saveProgress(video.currentTime, video.duration));
+        video.addEventListener('ended', () => {
+            saveProgress(video.duration, video.duration);
+            startAutoNext();
+        });
         window.addEventListener('beforeunload', () => {
             saveProgress(video.currentTime, video.duration);
             hls?.destroy();
         });
+
+        document.addEventListener('keydown', event => {
+            if (isTypingTarget(event.target)) return;
+            switch (event.key.toLowerCase()) {
+                case ' ':
+                case 'k':
+                    event.preventDefault();
+                    video.paused ? video.play() : video.pause();
+                    break;
+                case 'arrowleft':
+                case 'j':
+                    event.preventDefault();
+                    video.currentTime = Math.max(0, video.currentTime - 10);
+                    break;
+                case 'arrowright':
+                case 'l':
+                    event.preventDefault();
+                    video.currentTime = Math.min(video.duration || duration, video.currentTime + 10);
+                    break;
+                case 'm':
+                    video.muted = !video.muted;
+                    showToast(video.muted ? 'Muted' : 'Sound on');
+                    break;
+                case 'f':
+                    if (document.fullscreenElement) document.exitFullscreen();
+                    else video.requestFullscreen?.();
+                    break;
+                case 'n':
+                    if (nextUrl) window.location.assign(nextUrl);
+                    break;
+            }
+        });
         return;
     }
 
-    const player = document.querySelector('[data-demo-player]');
-    const fill = document.querySelector('[data-progress-fill]');
-    const label = document.querySelector('[data-time-label]');
-    const toggles = document.querySelectorAll('[data-play-toggle]');
-    if (!player || !fill || !label || toggles.length === 0) return;
-
-    let playing = false;
-    let progress = Math.min(duration, resumeAt);
-    lastSaved = progress;
-    let timer = null;
-
-    const formatTime = seconds => {
-        const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
-        return `${minutes}:${secs}`;
-    };
-
-    const render = () => {
-        fill.style.width = `${Math.min(100, (progress / duration) * 100)}%`;
-        label.textContent = `${formatTime(progress)} / ${formatTime(duration)}`;
-        toggles.forEach(button => button.textContent = playing ? '❚❚' : '▶');
-    };
-
-    const toggle = () => {
-        playing = !playing;
-        if (playing) {
-            timer = window.setInterval(() => {
-                progress = Math.min(duration, progress + 1);
-                render();
-                saveProgress(progress, duration);
-                if (progress >= duration) toggle();
-            }, 1000);
-        } else if (timer) {
-            clearInterval(timer);
-            timer = null;
-            saveProgress(progress, duration);
+    document.addEventListener('keydown', event => {
+        if (!isTypingTarget(event.target) && event.key.toLowerCase() === 'n' && nextUrl) {
+            window.location.assign(nextUrl);
         }
-        render();
-    };
+    });
+}
 
-    toggles.forEach(button => button.addEventListener('click', toggle));
-    render();
+function formatClock(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return hours > 0 ? `${hours}:${minutes}:${secs}` : `${minutes}:${secs}`;
 }
