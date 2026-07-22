@@ -1,16 +1,29 @@
 @model DiscoveryHomeViewModel
 @{
     ViewData["Title"] = "Movies, TV & Anime";
+    var shelves = new (string Id, string Eyebrow, string Title, List<DiscoveryTitleViewModel> Items)[]
+    {
+        ("trending", "This week", "Trending now", Model.Trending),
+        ("now-playing", "In cinemas", "Now playing", Model.NowPlaying),
+        ("top-rated", "All-time favorites", "Top rated movies", Model.TopRated),
+        ("movies", "Popular", "Movies", Model.Movies),
+        ("tv", "Binge-worthy", "TV shows", Model.TvShows),
+        ("airing", "Fresh episodes", "Airing today", Model.AiringToday),
+        ("anime", "From Japan", "Popular anime", Model.Anime),
+        ("k-drama", "From Korea", "K-drama spotlight", Model.KoreanDrama),
+        ("upcoming", "Coming soon", "Upcoming movies", Model.Upcoming),
+        ("documentaries", "Real stories", "Documentaries", Model.Documentaries)
+    };
 }
 
 <section class="discover-hero">
     <div class="discover-hero-shade"></div>
     <div class="page-shell discover-hero-content">
         <span class="eyebrow">Legal global discovery</span>
-        <h1>Movies, TV<br />and anime.</h1>
-        <p>Explore a live catalog, play official trailers, inspect seasons and cast, and find authorised streaming, rental and purchase providers in your region.</p>
+        <h1>Every story.<br />One place.</h1>
+        <p>Explore live movies, TV, anime, K-drama and documentaries. Play official trailers, inspect cast and seasons, and find authorised streaming, rental and purchase providers in your region.</p>
         <form class="discover-search" asp-controller="Discover" asp-action="Search" method="get">
-            <input type="search" name="q" placeholder="Search movies, series or anime..." aria-label="Search the legal catalog" required />
+            <input type="search" name="q" placeholder="Search movies, series, actors or anime..." aria-label="Search the legal catalog" required />
             <select name="type" aria-label="Content type">
                 <option value="all">Everything</option>
                 <option value="movie">Movies</option>
@@ -23,6 +36,7 @@
                 <option value="GB" selected="@(Model.Region == "GB" ? "selected" : null)">United Kingdom</option>
                 <option value="IN" selected="@(Model.Region == "IN" ? "selected" : null)">India</option>
                 <option value="JP" selected="@(Model.Region == "JP" ? "selected" : null)">Japan</option>
+                <option value="KR" selected="@(Model.Region == "KR" ? "selected" : null)">South Korea</option>
                 <option value="CA" selected="@(Model.Region == "CA" ? "selected" : null)">Canada</option>
                 <option value="AU" selected="@(Model.Region == "AU" ? "selected" : null)">Australia</option>
             </select>
@@ -30,8 +44,16 @@
         </form>
         <div class="discover-hero-actions">
             <a class="button button-light" asp-controller="Browse" asp-action="Index">▶ Full open movies</a>
-            <a class="button button-glass" href="#trending">Browse catalog</a>
+            <a class="button button-glass" href="#trending">Browse live catalog</a>
         </div>
+        <nav class="discover-shortcuts" aria-label="Catalog collections">
+            <a href="#now-playing">Now playing</a>
+            <a href="#top-rated">Top rated</a>
+            <a href="#airing">Airing today</a>
+            <a href="#anime">Anime</a>
+            <a href="#k-drama">K-drama</a>
+            <a href="#upcoming">Coming soon</a>
+        </nav>
     </div>
 </section>
 
@@ -52,63 +74,20 @@
         <div class="alert-error">@Model.ErrorMessage</div>
     }
 
-    @if (Model.Trending.Count > 0)
+    @foreach (var shelf in shelves)
     {
-        <section class="discovery-row">
-            <div class="section-heading">
-                <div><span class="eyebrow">This week</span><h2>Trending now</h2></div>
-                <a asp-controller="Discover" asp-action="Search" asp-route-type="all" asp-route-region="@Model.Region" asp-route-q="trending">Explore</a>
-            </div>
-            <div class="discovery-rail">
-                @foreach (var title in Model.Trending)
-                {
-                    <partial name="_DiscoveryCard" model="title" />
-                }
-            </div>
-        </section>
-    }
+        if (shelf.Items.Count == 0)
+        {
+            continue;
+        }
 
-    @if (Model.Movies.Count > 0)
-    {
-        <section class="discovery-row">
+        <section class="discovery-row" id="@shelf.Id">
             <div class="section-heading">
-                <div><span class="eyebrow">Popular</span><h2>Movies</h2></div>
-                <a asp-controller="Discover" asp-action="Search" asp-route-type="movie" asp-route-region="@Model.Region" asp-route-q="movie">Search movies</a>
+                <div><span class="eyebrow">@shelf.Eyebrow</span><h2>@shelf.Title</h2></div>
+                <span class="shelf-count">@shelf.Items.Count picks</span>
             </div>
             <div class="discovery-rail">
-                @foreach (var title in Model.Movies)
-                {
-                    <partial name="_DiscoveryCard" model="title" />
-                }
-            </div>
-        </section>
-    }
-
-    @if (Model.TvShows.Count > 0)
-    {
-        <section class="discovery-row">
-            <div class="section-heading">
-                <div><span class="eyebrow">Binge-worthy</span><h2>TV shows</h2></div>
-                <a asp-controller="Discover" asp-action="Search" asp-route-type="tv" asp-route-region="@Model.Region" asp-route-q="series">Search TV</a>
-            </div>
-            <div class="discovery-rail">
-                @foreach (var title in Model.TvShows)
-                {
-                    <partial name="_DiscoveryCard" model="title" />
-                }
-            </div>
-        </section>
-    }
-
-    @if (Model.Anime.Count > 0)
-    {
-        <section class="discovery-row">
-            <div class="section-heading">
-                <div><span class="eyebrow">From Japan</span><h2>Popular anime</h2></div>
-                <a asp-controller="Discover" asp-action="Search" asp-route-type="anime" asp-route-region="@Model.Region" asp-route-q="anime">Search anime</a>
-            </div>
-            <div class="discovery-rail">
-                @foreach (var title in Model.Anime)
+                @foreach (var title in shelf.Items)
                 {
                     <partial name="_DiscoveryCard" model="title" />
                 }
