@@ -4,13 +4,13 @@ namespace StreamNova.Services;
 
 public static class PlayableCatalogMigration
 {
-    public const int SchemaVersion = 4;
+    public const int SchemaVersion = 5;
 
     public static void Apply(DatabaseState state)
     {
         if (state.SchemaVersion < 2)
         {
-            EnsureOpenMovies(state, BuildOriginalOpenMovies());
+            EnsureCatalogItems(state, BuildOriginalOpenMovies());
         }
 
         if (state.SchemaVersion < 3)
@@ -20,13 +20,18 @@ public static class PlayableCatalogMigration
 
         if (state.SchemaVersion < 4)
         {
-            EnsureOpenMovies(state, BuildExpandedOpenMovies());
+            EnsureCatalogItems(state, BuildExpandedOpenMovies());
+        }
+
+        if (state.SchemaVersion < 5)
+        {
+            EnsureCatalogItems(state, BuildCuratedTrailers());
         }
 
         state.SchemaVersion = SchemaVersion;
     }
 
-    private static void EnsureOpenMovies(DatabaseState state, IReadOnlyList<Movie> additions)
+    private static void EnsureCatalogItems(DatabaseState state, IReadOnlyList<Movie> additions)
     {
         var nextId = state.Movies.Count == 0 ? 1 : state.Movies.Max(movie => movie.Id) + 1;
 
@@ -88,7 +93,7 @@ public static class PlayableCatalogMigration
             VideoUrl = "https://www.youtube.com/watch?v=gCcx85zbxz4",
             PlaybackLabel = "Official trailer",
             SourceCredit = "Warner Bros.",
-            SourcePageUrl = "https://www.youtube.com/watch?v=gCcx85zbxz4",
+            SourcePageUrl = "https://www.warnerbros.com/movies/blade-runner-2049",
             LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
         },
         new Movie
@@ -96,7 +101,7 @@ public static class PlayableCatalogMigration
             Title = "Shutter Island",
             VideoUrl = "https://www.youtube.com/watch?v=v8yrZSkKxTA",
             PlaybackLabel = "Official trailer",
-            SourceCredit = "Rotten Tomatoes Classic Trailers / Paramount Pictures",
+            SourceCredit = "Paramount Pictures",
             SourcePageUrl = "https://www.paramountpictures.com/movies/shutter-island",
             LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
         },
@@ -105,7 +110,7 @@ public static class PlayableCatalogMigration
             Title = "Fast X",
             VideoUrl = "https://www.youtube.com/watch?v=SAhlmquynBY",
             PlaybackLabel = "Official trailer",
-            SourceCredit = "Universal Pictures Canada",
+            SourceCredit = "Universal Pictures",
             SourcePageUrl = "https://www.fastxmovie.com/",
             LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
         },
@@ -128,6 +133,92 @@ public static class PlayableCatalogMigration
             LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova"
         }
     ];
+
+    private static List<Movie> BuildCuratedTrailers() =>
+    [
+        CreateTrailer(
+            "Oppenheimer",
+            "The story of the physicist whose work on the Manhattan Project changed history and the modern world.",
+            "Drama", 2023, 180, "R", "/images/trailer-drama.svg",
+            "https://www.youtube.com/watch?v=uYPbbksJxIg",
+            "Universal Pictures", "https://www.universalpictures.com/movies/oppenheimer", 8.6, trending: true, newRelease: true),
+        CreateTrailer(
+            "The Batman",
+            "A young Batman follows a trail of corruption while a serial killer targets Gotham's elite.",
+            "Thriller", 2022, 176, "PG-13", "/images/trailer-action.svg",
+            "https://www.youtube.com/watch?v=mqqft2x_Aa4",
+            "Warner Bros. Pictures", "https://www.warnerbros.com/movies/batman", 7.8, trending: true),
+        CreateTrailer(
+            "Avatar: The Way of Water",
+            "The Sully family fights to protect one another and the ocean clans of Pandora.",
+            "Sci-Fi", 2022, 192, "PG-13", "/images/trailer-space.svg",
+            "https://www.youtube.com/watch?v=d9MyW72ELq0",
+            "20th Century Studios", "https://www.avatar.com/movies/avatar-the-way-of-water", 7.6, newRelease: true),
+        CreateTrailer(
+            "Top Gun: Maverick",
+            "An elite naval aviator returns to train a new generation for a dangerous mission.",
+            "Action", 2022, 131, "PG-13", "/images/trailer-action.svg",
+            "https://www.youtube.com/watch?v=giXco2jaZ_4",
+            "Paramount Pictures", "https://www.paramountpictures.com/movies/top-gun-maverick", 8.3, trending: true),
+        CreateTrailer(
+            "Joker",
+            "A struggling performer descends into isolation and becomes an infamous figure in Gotham City.",
+            "Drama", 2019, 122, "R", "/images/trailer-drama.svg",
+            "https://www.youtube.com/watch?v=zAGVQLHvwOY",
+            "Warner Bros. Pictures", "https://www.warnerbros.com/movies/joker", 8.4),
+        CreateTrailer(
+            "Dune",
+            "A gifted young heir travels to the most dangerous planet in the universe to protect his people.",
+            "Sci-Fi", 2021, 155, "PG-13", "/images/trailer-space.svg",
+            "https://www.youtube.com/watch?v=n9xhJrPXop4",
+            "Warner Bros. Pictures", "https://www.warnerbros.com/movies/dune", 8.0, trending: true),
+        CreateTrailer(
+            "Everything Everywhere All at Once",
+            "An exhausted laundromat owner is swept into a multiverse-spanning adventure.",
+            "Sci-Fi", 2022, 140, "R", "/images/trailer-comedy.svg",
+            "https://www.youtube.com/watch?v=wxN1T1uxQ2g",
+            "A24", "https://a24films.com/films/everything-everywhere-all-at-once", 7.8, newRelease: true),
+        CreateTrailer(
+            "Spider-Man: Across the Spider-Verse",
+            "Miles Morales journeys across the multiverse and clashes with a team of Spider-People.",
+            "Animation", 2023, 140, "PG", "/images/trailer-animation.svg",
+            "https://www.youtube.com/watch?v=cqGjhVJWtEg",
+            "Sony Pictures Entertainment", "https://www.sonypictures.com/movies/spidermanacrossthespiderverse", 8.6, trending: true, newRelease: true)
+    ];
+
+    private static Movie CreateTrailer(
+        string title,
+        string synopsis,
+        string genre,
+        int year,
+        int durationMinutes,
+        string maturityRating,
+        string artwork,
+        string videoUrl,
+        string sourceCredit,
+        string sourcePageUrl,
+        double score,
+        bool trending = false,
+        bool newRelease = false) =>
+        new()
+        {
+            Title = title,
+            Synopsis = synopsis,
+            Genre = genre,
+            Year = year,
+            DurationMinutes = durationMinutes,
+            MaturityRating = maturityRating,
+            PosterPath = artwork,
+            BackdropPath = artwork,
+            VideoUrl = videoUrl,
+            PlaybackLabel = "Official trailer",
+            SourceCredit = sourceCredit,
+            SourcePageUrl = sourcePageUrl,
+            LicenseLabel = "Official promotional preview; full feature not hosted by StreamNova",
+            Score = score,
+            Trending = trending,
+            NewRelease = newRelease
+        };
 
     public static List<Movie> BuildOpenMovies()
     {
