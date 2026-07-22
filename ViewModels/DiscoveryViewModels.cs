@@ -9,6 +9,12 @@ public sealed class DiscoveryHomeViewModel
     public List<DiscoveryTitleViewModel> Movies { get; set; } = [];
     public List<DiscoveryTitleViewModel> TvShows { get; set; } = [];
     public List<DiscoveryTitleViewModel> Anime { get; set; } = [];
+    public List<DiscoveryTitleViewModel> NowPlaying { get; set; } = [];
+    public List<DiscoveryTitleViewModel> TopRated { get; set; } = [];
+    public List<DiscoveryTitleViewModel> Upcoming { get; set; } = [];
+    public List<DiscoveryTitleViewModel> AiringToday { get; set; } = [];
+    public List<DiscoveryTitleViewModel> KoreanDrama { get; set; } = [];
+    public List<DiscoveryTitleViewModel> Documentaries { get; set; } = [];
 }
 
 public sealed class DiscoverySearchViewModel
