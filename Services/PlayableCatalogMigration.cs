@@ -4,13 +4,13 @@ namespace StreamNova.Services;
 
 public static class PlayableCatalogMigration
 {
-    public const int SchemaVersion = 3;
+    public const int SchemaVersion = 4;
 
     public static void Apply(DatabaseState state)
     {
         if (state.SchemaVersion < 2)
         {
-            EnsureOpenMovies(state);
+            EnsureOpenMovies(state, BuildOriginalOpenMovies());
         }
 
         if (state.SchemaVersion < 3)
@@ -18,13 +18,17 @@ public static class PlayableCatalogMigration
             EnsureOfficialPreviews(state);
         }
 
+        if (state.SchemaVersion < 4)
+        {
+            EnsureOpenMovies(state, BuildExpandedOpenMovies());
+        }
+
         state.SchemaVersion = SchemaVersion;
     }
 
-    private static void EnsureOpenMovies(DatabaseState state)
+    private static void EnsureOpenMovies(DatabaseState state, IReadOnlyList<Movie> additions)
     {
         var nextId = state.Movies.Count == 0 ? 1 : state.Movies.Max(movie => movie.Id) + 1;
-        var additions = BuildOpenMovies();
 
         for (var index = additions.Count - 1; index >= 0; index--)
         {
@@ -47,12 +51,10 @@ public static class PlayableCatalogMigration
         foreach (var preview in BuildOfficialPreviews())
         {
             var movie = FindMovie(state, preview.Title);
-            if (movie is null)
+            if (movie is not null)
             {
-                continue;
+                ApplyPlaybackMetadata(movie, preview);
             }
-
-            ApplyPlaybackMetadata(movie, preview);
         }
     }
 
@@ -62,30 +64,11 @@ public static class PlayableCatalogMigration
 
     private static void ApplyPlaybackMetadata(Movie target, Movie source)
     {
-        if (string.IsNullOrWhiteSpace(target.VideoUrl))
-        {
-            target.VideoUrl = source.VideoUrl;
-        }
-
-        if (string.IsNullOrWhiteSpace(target.PlaybackLabel))
-        {
-            target.PlaybackLabel = source.PlaybackLabel;
-        }
-
-        if (string.IsNullOrWhiteSpace(target.SourceCredit))
-        {
-            target.SourceCredit = source.SourceCredit;
-        }
-
-        if (string.IsNullOrWhiteSpace(target.SourcePageUrl))
-        {
-            target.SourcePageUrl = source.SourcePageUrl;
-        }
-
-        if (string.IsNullOrWhiteSpace(target.LicenseLabel))
-        {
-            target.LicenseLabel = source.LicenseLabel;
-        }
+        target.VideoUrl ??= source.VideoUrl;
+        target.PlaybackLabel ??= source.PlaybackLabel;
+        target.SourceCredit ??= source.SourceCredit;
+        target.SourcePageUrl ??= source.SourcePageUrl;
+        target.LicenseLabel ??= source.LicenseLabel;
     }
 
     private static List<Movie> BuildOfficialPreviews() =>
@@ -146,7 +129,14 @@ public static class PlayableCatalogMigration
         }
     ];
 
-    public static List<Movie> BuildOpenMovies() =>
+    public static List<Movie> BuildOpenMovies()
+    {
+        var movies = BuildOriginalOpenMovies();
+        movies.AddRange(BuildExpandedOpenMovies());
+        return movies;
+    }
+
+    private static List<Movie> BuildOriginalOpenMovies() =>
     [
         new Movie
         {
@@ -220,6 +210,120 @@ public static class PlayableCatalogMigration
             SourcePageUrl = "https://mango.blender.org/about/",
             LicenseLabel = "Creative Commons Attribution 3.0",
             Score = 7.8,
+            NewRelease = true
+        }
+    ];
+
+    private static List<Movie> BuildExpandedOpenMovies() =>
+    [
+        new Movie
+        {
+            Title = "Spring",
+            Synopsis = "A shepherd and her dog confront ancient spirits to restore the cycle of the seasons.",
+            Genre = "Fantasy",
+            Year = 2019,
+            DurationMinutes = 8,
+            MaturityRating = "G",
+            PosterPath = "/images/spring-open-movie.svg",
+            BackdropPath = "/images/spring-open-movie.svg",
+            VideoUrl = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Spring_-_Blender_Open_Movie.webm",
+            PlaybackLabel = "Full open movie",
+            SourceCredit = "Blender Foundation / Wikimedia Commons",
+            SourcePageUrl = "https://studio.blender.org/films/spring/",
+            LicenseLabel = "Creative Commons Attribution 4.0",
+            Score = 8.5,
+            Trending = true,
+            NewRelease = true
+        },
+        new Movie
+        {
+            Title = "Sprite Fright",
+            Synopsis = "Teenagers discover that a peaceful woodland community is far more dangerous than it appears.",
+            Genre = "Animation",
+            Year = 2021,
+            DurationMinutes = 11,
+            MaturityRating = "PG",
+            PosterPath = "/images/sprite-fright.svg",
+            BackdropPath = "/images/sprite-fright.svg",
+            VideoUrl = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Sprite_Fright_-_Open_Movie_by_Blender_Studio.webm",
+            PlaybackLabel = "Full open movie",
+            SourceCredit = "Blender Studio / Wikimedia Commons",
+            SourcePageUrl = "https://studio.blender.org/films/sprite-fright/",
+            LicenseLabel = "Creative Commons Attribution 4.0",
+            Score = 8.2,
+            Trending = true
+        },
+        new Movie
+        {
+            Title = "Cosmos Laundromat",
+            Synopsis = "A suicidal sheep meets a mysterious salesman who offers him a life-changing journey.",
+            Genre = "Fantasy",
+            Year = 2015,
+            DurationMinutes = 12,
+            MaturityRating = "PG",
+            PosterPath = "/images/cosmos-laundromat.svg",
+            BackdropPath = "/images/cosmos-laundromat.svg",
+            VideoUrl = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Cosmos_Laundromat_-_First_Cycle_-_Official_Blender_Foundation_release.webm",
+            PlaybackLabel = "Full open movie",
+            SourceCredit = "Blender Foundation / Wikimedia Commons",
+            SourcePageUrl = "https://studio.blender.org/projects/cosmos-laundromat/",
+            LicenseLabel = "Creative Commons Attribution 3.0",
+            Score = 8.0,
+            Trending = true
+        },
+        new Movie
+        {
+            Title = "Coffee Run",
+            Synopsis = "A woman races through memories of a relationship while trying to reach her morning coffee.",
+            Genre = "Comedy",
+            Year = 2020,
+            DurationMinutes = 3,
+            MaturityRating = "G",
+            PosterPath = "/images/coffee-run.svg",
+            BackdropPath = "/images/coffee-run.svg",
+            VideoUrl = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Coffee_Run_-_Blender_Open_Movie-full_movie.webm",
+            PlaybackLabel = "Full open movie",
+            SourceCredit = "Blender Studio / Wikimedia Commons",
+            SourcePageUrl = "https://studio.blender.org/films/coffee-run/",
+            LicenseLabel = "Creative Commons Attribution 4.0",
+            Score = 7.9,
+            NewRelease = true
+        },
+        new Movie
+        {
+            Title = "Charge",
+            Synopsis = "In a post-apocalyptic world, an old robot faces one final confrontation over a precious source of energy.",
+            Genre = "Sci-Fi",
+            Year = 2022,
+            DurationMinutes = 5,
+            MaturityRating = "PG",
+            PosterPath = "/images/charge-open-movie.svg",
+            BackdropPath = "/images/charge-open-movie.svg",
+            VideoUrl = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Charge_-_Blender_Open_Movie-full_movie.webm",
+            PlaybackLabel = "Full open movie",
+            SourceCredit = "Blender Studio / Wikimedia Commons",
+            SourcePageUrl = "https://studio.blender.org/films/charge/",
+            LicenseLabel = "Creative Commons Attribution 4.0",
+            Score = 8.1,
+            Trending = true,
+            NewRelease = true
+        },
+        new Movie
+        {
+            Title = "WING IT!",
+            Synopsis = "An inexperienced engineer and an ambitious pilot improvise their way through a chaotic flight test.",
+            Genre = "Comedy",
+            Year = 2023,
+            DurationMinutes = 4,
+            MaturityRating = "G",
+            PosterPath = "/images/wing-it.svg",
+            BackdropPath = "/images/wing-it.svg",
+            VideoUrl = "https://commons.wikimedia.org/wiki/Special:Redirect/file/WING_IT%21_-_Blender_Open_Movie-full_movie.webm",
+            PlaybackLabel = "Full open movie",
+            SourceCredit = "Blender Studio / Wikimedia Commons",
+            SourcePageUrl = "https://studio.blender.org/films/wing-it/",
+            LicenseLabel = "Creative Commons Attribution 4.0",
+            Score = 8.0,
             NewRelease = true
         }
     ];

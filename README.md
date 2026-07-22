@@ -2,90 +2,157 @@
 
 > Discover. Watch. Manage. Beyond the ordinary.
 
-StreamNova is an original Netflix-inspired streaming and content-operations platform built with ASP.NET Core MVC and C#. It transforms a basic movie manager into a multi-module web application with secure accounts, personalized discovery, membership plans, customer support, notifications, playback tracking, reviews, and administrator analytics.
+StreamNova is a legal streaming-discovery and content-operations platform built with ASP.NET Core MVC and C#. It combines a full account-based application, a live TMDB movies/TV/anime catalog, open-license full movies, official trailers, legal provider discovery and a globally deployable public mirror.
 
-## Functional features
+## Viewer experience
 
-### Viewer experience
 - Register and sign in with secure PBKDF2 password hashing
 - Browse a responsive streaming-style catalog
-- Search by title, genre, or description
-- Filter movies by genre
-- Open movie details and similar-title recommendations
-- Receive personalized recommendations based on watchlist, playback, and review activity
-- Add and remove titles from **My List**
-- Play direct MP4, WebM, OGG, HLS, YouTube, and Vimeo sources
-- Watch included open-license short movies directly in the built-in player
-- Save playback progress automatically for HTML5 video sources
-- Resume a movie from the saved timestamp
-- See a personalized **Continue Watching** rail
-- Rate movies from 1 to 5 stars
-- Create, update, and delete personal reviews
-- Update the profile display name and password
+- Search and filter local titles by title, genre or description
+- Explore live TMDB movies, TV shows and anime
+- View cast, genres, ratings, seasons and episode counts
+- Play official YouTube trailers inside StreamNova
+- Find regional authorised streaming, rental and purchase providers
+- Add titles to **My List** and receive personalised recommendations
+- Save and resume HTML5 playback progress
+- See a personalised **Continue Watching** rail
+- Rate and review titles
+- Manage profile information and password
 
-### Membership and account operations
-- Compare Mobile, Standard, and Premium plans
-- Activate or switch a subscription
-- Cancel a subscription while retaining the current renewal date
-- Track subscription status and simulated renewal dates
-- Receive subscription notifications
-- Open a centralized notification center
-- Mark individual or all notifications as read
+## Legal playable catalog
+
+The built-in player supports:
+
+- Direct MP4, WebM and OGG media
+- HLS `.m3u8` adaptive streams
+- YouTube and Vimeo embeds
+- Fullscreen and mobile playback
+- Playback labels, source credits and licence information
+
+The included full open-movie catalog now contains:
+
+1. Big Buck Bunny
+2. Elephants Dream
+3. Sintel
+4. Tears of Steel
+5. Spring
+6. Sprite Fright
+7. Cosmos Laundromat
+8. Coffee Run
+9. Charge
+10. WING IT!
+
+The commercial demonstration catalog uses official promotional trailers and official rights-holder pages. Only owned, licensed, public-domain, open-license or officially embeddable media should be entered by an administrator.
+
+## Live Movies / TV / Anime discovery
+
+The `/discover` area uses the TMDB API for:
+
+- Weekly trending titles
+- Popular movies and TV
+- Japanese animation discovery
+- Multi-type search
+- Poster and backdrop artwork
+- Cast, metadata, seasons and episode counts
+- Official trailers
+- Country-specific legal provider availability
+
+Set this private hosting environment variable to activate it:
+
+```text
+TMDB_READ_ACCESS_TOKEN=your-read-access-token
+```
+
+Never commit the token to GitHub. See `TMDB_LEGAL_CATALOG_SETUP.md`.
+
+## Accounts and operations
+
+### Membership
+
+- Mobile, Standard and Premium plan comparison
+- Subscription activation, switching and cancellation
+- Simulated renewal dates and notifications
 
 ### Customer support
-- Create support tickets for account, playback, billing, general, and content-request issues
-- Select ticket priority
-- Track open and resolved requests
-- Read administrator responses inside the support center
-- Receive a notification when a ticket is opened or resolved
 
-### Administrator experience
-- Role-protected administrator dashboard
-- Catalog, user, watchlist, playback, and review statistics
-- Active subscription and simulated monthly recurring revenue metrics
-- Open support-ticket metrics
-- Add, edit, and delete movies
-- Set featured, trending, and new-release flags
-- Configure poster, backdrop, MP4, WebM, OGG, HLS, YouTube, and Vimeo URLs
-- Record source credit, license information, and an official source page
-- View registered users and their activity totals
-- Moderate movie reviews
-- Review the support queue, publish resolutions, and notify customers
+- Account, playback, billing, content and general support tickets
+- Priority selection and ticket tracking
+- Administrator resolutions and customer notifications
 
-### Operations
-- Built-in `/health` endpoint
-- Docker multi-stage build
-- GitHub Actions build validation
-- Free MonsterASP.NET Windows/IIS package and WebDeploy workflow
-- Azure App Service deployment workflow and guide
-- Render Blueprint through `render.yaml`
-- Configurable JSON data path through `STREAMNOVA_DATA_PATH`
-- Thread-safe local persistence with no external database dependency
-- No external NuGet packages required
+### Administration
 
-## Playback sources
+- Role-protected dashboard
+- Catalog, user, playback, watchlist, review, subscription and support statistics
+- Movie creation, editing and deletion
+- Featured, trending and new-release controls
+- Legal source URL, licence, credit and official-page management
+- Review moderation and support operations
 
-The player resolves media automatically from the URL entered by an administrator:
+## Reliability and global access
 
-- Direct MP4, WebM, and OGG files use the browser's HTML5 video player.
-- HLS `.m3u8` streams use native browser playback when available and HLS.js otherwise.
-- YouTube watch, short, live, and share URLs are converted to privacy-conscious embedded playback.
-- Vimeo page and player URLs are converted to embedded playback.
-- Unsupported or missing sources display a clear unavailable message instead of fake playback.
+StreamNova has three complementary deployment targets:
 
-The initial catalog includes four playable Blender open movies: **Big Buck Bunny**, **Elephants Dream**, **Sintel**, and **Tears of Steel**. Source and license information is displayed on the watch page. Only media that is owned, licensed, public-domain, open-license, or officially embeddable should be added.
+### MonsterASP.NET backend
+
+`.github/workflows/monsterasp-free-hosting.yml` builds and WebDeploys every push to `main` automatically. It validates deployment secrets, publishes the IIS package and attempts a public `/health` check.
+
+```text
+http://streamnova.runasp.net
+```
+
+HTTPS redirect is optional instead of forced, improving compatibility with free shared hosting. Enable it only where HTTPS is correctly configured:
+
+```text
+STREAMNOVA_FORCE_HTTPS=true
+```
+
+### Render full application
+
+`render.yaml` defines an auto-deploying Docker Blueprint with `/health` monitoring. Create a Blueprint from this repository once; all later pushes to `main` deploy automatically.
+
+### GitHub Pages public mirror
+
+`public-site` is a standalone installable PWA with:
+
+- 10 full legal open movies
+- 6 official trailers
+- Search and category filters
+- Local favorites
+- Surprise-me playback
+- Responsive modal player
+- Offline application shell
+
+`.github/workflows/public-mirror-pages.yml` publishes it automatically after GitHub Pages is configured to use GitHub Actions.
+
+Expected address:
+
+```text
+https://azizulhakim00.github.io/StreamNova-ASP.NET-Core/
+```
+
+Read `GLOBAL_ACCESS_SETUP.md` for the exact one-time setup and DNS explanation.
+
+## Health and diagnostics
+
+```text
+GET /health
+GET /api/status
+```
+
+`/health` is used by hosting platforms. `/api/status` returns a small JSON status payload with UTC time and application version.
 
 ## Technology stack
 
-- .NET 10 LTS
-- ASP.NET Core MVC
+- .NET 10 and ASP.NET Core MVC
 - C# and Razor Views
 - Cookie authentication and role authorization
-- PBKDF2 password hashing using built-in .NET cryptography
+- Built-in PBKDF2 cryptography
 - Thread-safe JSON persistence
-- HTML, CSS, and JavaScript
-- HLS.js for adaptive HLS playback where native support is unavailable
-- IIS, Docker, and GitHub Actions deployment support
+- TMDB API and JustWatch-attributed provider data
+- HTML, CSS and JavaScript
+- HLS.js adaptive playback fallback
+- IIS WebDeploy, Docker, Render and GitHub Pages
+- GitHub Actions CI/CD
 
 ## Demo accounts
 
@@ -94,82 +161,52 @@ The initial catalog includes four playable Blender open movies: **Big Buck Bunny
 | Administrator | `admin@streamnova.local` | `Admin@123` |
 | Viewer | `user@streamnova.local` | `User@123` |
 
-The demo accounts and initial movie catalog are created automatically on first start. Existing databases are upgraded in place to add the open-movie catalog without deleting accounts, watchlists, reviews, or support data.
-
 ## Run locally
-
-Install the .NET 10 SDK, open a terminal inside the project, and run:
 
 ```bash
 dotnet restore
 dotnet run
 ```
 
-Open `http://localhost:5167`.
+Open `http://localhost:5167`. On Windows, `run.bat` can also be used.
 
-On Windows, `run.bat` can also be used. Visual Studio users can open `StreamNova.csproj` and press **Ctrl+F5**.
-
-## Free ASP.NET deployment
-
-The recommended no-subscription option is MonsterASP.NET's free ASP.NET hosting. The repository includes:
-
-- IIS in-process hosting configuration
-- A framework-dependent publish package
-- A downloadable GitHub Actions ZIP artifact
-- Automatic WebDeploy publishing after repository secrets are configured
-
-Follow `MONSTERASP_FREE_DEPLOYMENT.md` for the complete setup. After the four hosting secrets are configured, every push to `main` automatically deploys the newest StreamNova version.
-
-## Run with Docker
+## Docker
 
 ```bash
 docker build -t streamnova .
 docker run --rm -p 8080:8080 streamnova
 ```
 
-Open `http://localhost:8080`. The health endpoint is available at `http://localhost:8080/health`.
-
-## Azure App Service deployment
-
-Azure deployment files remain available for accounts with an active Azure subscription. Follow `AZURE_DEPLOYMENT.md` for the complete setup.
-
-## Deploy on Render
-
-The repository contains `render.yaml` for Docker deployment.
-
-1. Sign in to Render.
-2. Select **New → Blueprint**.
-3. Connect `AzizulHakim00/StreamNova-ASP.NET-Core`.
-4. Apply the Blueprint.
-
-The free Render filesystem is temporary. For persistent production data, attach a disk and set:
-
-```text
-STREAMNOVA_DATA_PATH=/var/data/streamnova.json
-```
+Open `http://localhost:8080`.
 
 ## Data storage
 
-Runtime data is stored by default in:
+The default database is:
 
 ```text
 App_Data/streamnova.json
 ```
 
-The JSON state includes users, movies, watchlists, playback progress, reviews, plans, subscriptions, notifications, support tickets, and a schema version for safe data upgrades. Delete the generated file to reset the demo database. Back it up before a full manual deployment replacement.
+Override it with:
+
+```text
+STREAMNOVA_DATA_PATH=/your/path/streamnova.json
+```
+
+The JSON state includes users, movies, watchlists, progress, reviews, plans, subscriptions, notifications, support tickets and a schema version. Back it up before replacing a production deployment.
 
 ## Project structure
 
 ```text
 StreamNova/
-├── Controllers/       # account, browse, subscription, notifications, support, admin
-├── Models/            # catalog and platform domain models
-├── Services/          # business logic, playback resolver, migrations, recommendations
-├── ViewModels/        # UI-specific data contracts
+├── Controllers/       # viewer, account, discovery, support and admin endpoints
+├── Models/            # platform domain models
+├── Services/          # persistence, playback, TMDB, migrations and recommendations
+├── ViewModels/        # UI-specific contracts
 ├── Views/             # Razor interfaces
-├── wwwroot/           # styling, scripts, and artwork
+├── wwwroot/           # ASP.NET styles, scripts and artwork
+├── public-site/       # globally deployable PWA mirror
 ├── App_Data/          # generated JSON database
-├── scripts/           # hosting provisioning scripts
 ├── .github/workflows/ # build and deployment pipelines
 ├── Dockerfile
 ├── render.yaml
@@ -177,6 +214,6 @@ StreamNova/
 └── StreamNova.csproj
 ```
 
-## Brand and content note
+## Brand and content policy
 
-StreamNova uses an original name, interface details, and source code. It is inspired by familiar streaming-platform interaction patterns but is not affiliated with Netflix or another streaming service. The project does not include or endorse unauthorized copyrighted movie streams.
+StreamNova uses an original name, interface and source code. It is not affiliated with Netflix, TMDB, JustWatch or another streaming service. This product uses the TMDB API but is not endorsed or certified by TMDB. StreamNova does not include, scrape, proxy or endorse unauthorised copyrighted streams.

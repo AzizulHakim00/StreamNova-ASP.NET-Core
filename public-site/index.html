@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08090c">
+  <meta name="description" content="StreamNova public movie discovery mirror with legal full open movies and official trailers.">
+  <title>StreamNova — Watch legal open movies</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+  <style>.favorite{z-index:6!important}.nav-button.active{color:#54dc86}</style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="StreamNova home"><span>S</span>StreamNova</a>
+    <nav>
+      <a href="#catalog">Browse</a>
+      <button id="favoritesButton" class="nav-button" type="button">My list <b id="favoriteCount">0</b></button>
+      <a href="http://streamnova.runasp.net" target="_blank" rel="noopener">Full app ↗</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-glow"></div>
+      <div class="hero-copy">
+        <p class="eyebrow">LEGAL · OPEN · INSTANT</p>
+        <h1>Movies that play.<br><em>Everywhere.</em></h1>
+        <p class="lede">Watch full Creative Commons films, explore official trailers, save favorites, and install StreamNova as an app. No account is required.</p>
+        <div class="hero-actions">
+          <button id="featuredPlay" class="button primary" type="button">▶ Play featured</button>
+          <button id="surpriseButton" class="button secondary" type="button">✦ Surprise me</button>
+          <button id="installButton" class="button ghost" type="button" hidden>Install app</button>
+        </div>
+        <div class="hero-stats"><span><b>10</b> full open movies</span><span><b>6</b> official trailers</span><span><b>0</b> pirate servers</span></div>
+      </div>
+    </section>
+
+    <section class="catalog" id="catalog">
+      <div class="section-title">
+        <div><p class="eyebrow">EXPLORE</p><h2>What do you want to watch?</h2></div>
+        <p id="resultCount" class="muted"></p>
+      </div>
+
+      <div class="toolbar">
+        <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search titles, genres or years…" autocomplete="off"></label>
+        <div class="filters" id="filters" aria-label="Catalog filters">
+          <button class="active" data-filter="all" type="button">All</button>
+          <button data-filter="full" type="button">Full movies</button>
+          <button data-filter="trailer" type="button">Trailers</button>
+          <button data-filter="animation" type="button">Animation</button>
+          <button data-filter="scifi" type="button">Sci‑Fi</button>
+          <button data-filter="comedy" type="button">Comedy</button>
+        </div>
+      </div>
+
+      <div class="grid" id="catalogGrid" aria-live="polite"></div>
+      <div class="empty" id="emptyState" hidden><h3>No matching titles</h3><p>Try another title or filter.</p></div>
+    </section>
+
+    <section class="legal-note">
+      <div><p class="eyebrow">CONTENT POLICY</p><h2>Built for safe, legal streaming.</h2></div>
+      <p>Full films are open-license works credited to their creators. Commercial titles use official promotional trailers only. StreamNova does not scrape, proxy, or embed unauthorized streaming servers.</p>
+    </section>
+  </main>
+
+  <footer><div class="brand"><span>S</span>StreamNova</div><p>Public mirror · Works without the ASP.NET server · Favorites stay on your device.</p><a href="https://github.com/AzizulHakim00/StreamNova-ASP.NET-Core" target="_blank" rel="noopener">Source code ↗</a></footer>
+
+  <dialog id="playerDialog" class="player-dialog">
+    <div class="player-head"><div><span id="playerBadge"></span><h2 id="playerTitle"></h2></div><button id="closePlayer" aria-label="Close player" type="button">×</button></div>
+    <div id="playerMount" class="player-mount"></div>
+    <div class="player-info"><p id="playerDescription"></p><div><span id="playerMeta"></span><a id="playerSource" target="_blank" rel="noopener">Official source ↗</a></div></div>
+  </dialog>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

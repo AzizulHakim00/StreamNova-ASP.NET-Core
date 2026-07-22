@@ -8,3 +8,9 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+      - key: STREAMNOVA_FORCE_HTTPS
+        value: "false"
+      - key: STREAMNOVA_DATA_PATH
+        value: /tmp/streamnova.json
+      - key: TMDB_READ_ACCESS_TOKEN
+        sync: false
