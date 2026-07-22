@@ -1,0 +1,13 @@
+{
+  "name": "StreamNova Public Mirror",
+  "short_name": "StreamNova",
+  "description": "Legal open movies and official trailers in an installable streaming catalog.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#08090c",
+  "theme_color": "#08090c",
+  "icons": [
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
