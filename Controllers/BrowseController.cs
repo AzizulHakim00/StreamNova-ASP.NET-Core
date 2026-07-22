@@ -89,10 +89,24 @@ public sealed class BrowseController : Controller
             resumeSeconds = progress?.ProgressSeconds ?? 0;
         }
 
+        var playable = (await _movieService.GetAllAsync())
+            .Where(item => VideoSourceResolver.Resolve(item.VideoUrl).Kind != VideoSourceResolver.None)
+            .OrderByDescending(item => item.Featured)
+            .ThenByDescending(item => item.Trending)
+            .ThenByDescending(item => item.NewRelease)
+            .ThenByDescending(item => item.Year)
+            .ThenBy(item => item.Title)
+            .ToList();
+        var currentIndex = playable.FindIndex(item => item.Id == id);
+        var previousMovie = currentIndex > 0 ? playable[currentIndex - 1] : null;
+        var nextMovie = currentIndex >= 0 && currentIndex < playable.Count - 1 ? playable[currentIndex + 1] : null;
+
         var playback = VideoSourceResolver.Resolve(movie.VideoUrl);
         return View(new WatchViewModel
         {
             Movie = movie,
+            PreviousMovie = previousMovie,
+            NextMovie = nextMovie,
             ResumeSeconds = resumeSeconds,
             PlaybackKind = playback.Kind,
             PlaybackUrl = playback.Url,
