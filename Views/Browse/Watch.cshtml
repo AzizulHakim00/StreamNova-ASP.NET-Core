@@ -5,6 +5,7 @@
     var isHtmlVideo = Model.PlaybackKind == "direct" || Model.PlaybackKind == "hls";
     var isPreview = Model.Movie.PlaybackLabel?.Contains("trailer", StringComparison.OrdinalIgnoreCase) == true;
     var canSaveProgress = User.Identity?.IsAuthenticated == true;
+    var nextUrl = Model.NextMovie is null ? string.Empty : Url.Action("Watch", "Browse", new { id = Model.NextMovie.Id });
 }
 
 @if (Model.PlaybackKind == "hls")
@@ -12,7 +13,13 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 }
 
-<section class="watch-page" data-watch-page data-movie-id="@Model.Movie.Id" data-duration="@(Model.Movie.DurationMinutes * 60)" data-resume="@Model.ResumeSeconds">
+<section class="watch-page"
+         data-watch-page
+         data-movie-id="@Model.Movie.Id"
+         data-duration="@(Model.Movie.DurationMinutes * 60)"
+         data-resume="@Model.ResumeSeconds"
+         data-next-url="@nextUrl"
+         data-next-title="@(Model.NextMovie?.Title ?? string.Empty)">
     <div class="watch-topbar">
         <a class="watch-back" asp-action="Details" asp-route-id="@Model.Movie.Id">← Back</a>
         <div class="watch-title-group">
@@ -69,6 +76,59 @@
         }
     </div>
 
+    <div class="watch-command-bar" aria-label="Player actions">
+        <div class="watch-command-group">
+            @if (Model.PreviousMovie is not null)
+            {
+                <a class="watch-command" asp-action="Watch" asp-route-id="@Model.PreviousMovie.Id" title="Previous: @Model.PreviousMovie.Title">← Previous</a>
+            }
+            @if (Model.NextMovie is not null)
+            {
+                <a class="watch-command" asp-action="Watch" asp-route-id="@Model.NextMovie.Id" title="Next: @Model.NextMovie.Title">Next →</a>
+            }
+        </div>
+        <div class="watch-command-group">
+            @if (isHtmlVideo)
+            {
+                <label class="speed-control">
+                    <span>Speed</span>
+                    <select data-playback-speed aria-label="Playback speed">
+                        <option value="0.5">0.5×</option>
+                        <option value="0.75">0.75×</option>
+                        <option value="1" selected>1×</option>
+                        <option value="1.25">1.25×</option>
+                        <option value="1.5">1.5×</option>
+                        <option value="2">2×</option>
+                    </select>
+                </label>
+                <button class="watch-command" type="button" data-picture-in-picture>Picture in picture</button>
+            }
+            <button class="watch-command" type="button" data-theater-mode>Theater mode</button>
+            <button class="watch-command" type="button" data-share-watch>Share</button>
+        </div>
+    </div>
+
+    <div class="keyboard-help">
+        <span><kbd>Space</kbd> play/pause</span>
+        <span><kbd>←</kbd>/<kbd>→</kbd> seek 10s</span>
+        <span><kbd>M</kbd> mute</span>
+        <span><kbd>F</kbd> fullscreen</span>
+        <span><kbd>N</kbd> next title</span>
+    </div>
+
+    @if (Model.NextMovie is not null)
+    {
+        <aside class="next-title-card" data-next-title-card hidden>
+            <span>Up next</span>
+            <strong>@Model.NextMovie.Title</strong>
+            <small>Starting automatically in <b data-next-countdown>8</b> seconds</small>
+            <div>
+                <a class="button button-small button-primary" asp-action="Watch" asp-route-id="@Model.NextMovie.Id">Play now</a>
+                <button class="button button-small button-glass" type="button" data-cancel-next>Cancel</button>
+            </div>
+        </aside>
+    }
+
     @if (isPreview)
     {
         <div class="preview-notice">
@@ -88,6 +148,8 @@
             }
         </aside>
     }
+
+    <div class="watch-toast" data-watch-toast role="status" aria-live="polite" hidden></div>
 </section>
 <form id="progressTokenForm" class="hidden-form">@Html.AntiForgeryToken()</form>
 

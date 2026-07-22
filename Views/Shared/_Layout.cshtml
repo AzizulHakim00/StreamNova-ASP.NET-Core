@@ -11,7 +11,9 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/platform.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/playback.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/watch-upgrade.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/discover.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/catalog-upgrade.css" asp-append-version="true" />
 </head>
 <body>
 <header class="site-header" id="siteHeader">
@@ -37,7 +39,7 @@
         <form class="header-search" asp-controller="Discover" asp-action="Search" method="get">
             <input type="hidden" name="type" value="all" />
             <input type="hidden" name="region" value="BD" />
-            <input type="search" name="q" placeholder="Movies, TV, anime..." aria-label="Search movies TV and anime" required />
+            <input type="search" name="q" placeholder="Movies, TV, anime...  /" aria-label="Search movies TV and anime" required />
             <button type="submit" aria-label="Search">⌕</button>
         </form>
         @if (User.Identity?.IsAuthenticated == true)
@@ -96,6 +98,7 @@
 </footer>
 
 <script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/catalog-upgrade.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

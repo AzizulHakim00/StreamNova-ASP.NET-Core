@@ -7,16 +7,19 @@ namespace StreamNova.Controllers;
 public sealed class DiscoverController : Controller
 {
     private readonly TmdbService _tmdbService;
+    private readonly TmdbShelfService _tmdbShelfService;
 
-    public DiscoverController(TmdbService tmdbService)
+    public DiscoverController(TmdbService tmdbService, TmdbShelfService tmdbShelfService)
     {
         _tmdbService = tmdbService;
+        _tmdbShelfService = tmdbShelfService;
     }
 
     [HttpGet("")]
     public async Task<IActionResult> Index(string? region, CancellationToken cancellationToken)
     {
         var model = await _tmdbService.GetHomeAsync(region, cancellationToken);
+        await _tmdbShelfService.PopulateAsync(model, cancellationToken);
         return View(model);
     }
 

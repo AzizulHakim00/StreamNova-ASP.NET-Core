@@ -39,6 +39,12 @@ builder.Services.AddHttpClient<TmdbService>(client =>
     client.Timeout = TimeSpan.FromSeconds(15);
     client.DefaultRequestHeaders.UserAgent.ParseAdd("StreamNova/2.0 (+https://github.com/AzizulHakim00/StreamNova-ASP.NET-Core)");
 });
+builder.Services.AddHttpClient<TmdbShelfService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.themoviedb.org/3/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("StreamNova/2.0 (+https://github.com/AzizulHakim00/StreamNova-ASP.NET-Core)");
+});
 
 builder.Services.AddSingleton<JsonDatabase>();
 builder.Services.AddSingleton<PasswordService>();

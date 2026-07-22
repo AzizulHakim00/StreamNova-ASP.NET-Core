@@ -1,13 +1,17 @@
 @model BrowseViewModel
 @{
     ViewData["Title"] = "Browse";
+    var playableCount = Model.Movies.Count(movie => !string.IsNullOrWhiteSpace(movie.VideoUrl));
+    var fullMovieCount = Model.Movies.Count(movie => movie.PlaybackLabel?.Contains("Full", StringComparison.OrdinalIgnoreCase) == true);
+    var trailerCount = Model.Movies.Count(movie => movie.PlaybackLabel?.Contains("Trailer", StringComparison.OrdinalIgnoreCase) == true);
 }
 
-<section class="page-shell page-top">
+<section class="page-shell page-top browse-upgrade">
     <div class="browse-heading">
         <div>
-            <span class="eyebrow">Discover your next story</span>
-            <h1>Browse movies</h1>
+            <span class="eyebrow">Instant legal playback</span>
+            <h1>Open movies & trailers</h1>
+            <p class="browse-intro">Watch complete Creative Commons films or jump into official studio trailers. No account is required for playback.</p>
         </div>
         <form class="browse-search" method="get">
             <input type="search" name="q" value="@Model.Query" placeholder="Search titles or genres" />
@@ -29,6 +33,22 @@
         </form>
     </div>
 
+    <div class="browse-dashboard">
+        <div class="browse-stat"><strong>@playableCount</strong><span>Playable now</span></div>
+        <div class="browse-stat"><strong>@fullMovieCount</strong><span>Full open movies</span></div>
+        <div class="browse-stat"><strong>@trailerCount</strong><span>Official trailers</span></div>
+        <button class="button button-light" type="button" data-random-play>✦ Play something</button>
+        <a class="button button-glass" asp-controller="Discover" asp-action="Index">Explore live Movies & TV →</a>
+    </div>
+
+    <nav class="browse-collections" aria-label="Browse genres">
+        <a class="@(string.IsNullOrWhiteSpace(Model.Genre) ? "active" : null)" asp-action="Index">All</a>
+        @foreach (var genre in new[] { "Animation", "Sci-Fi", "Action", "Comedy", "Fantasy", "Drama", "Thriller" })
+        {
+            <a class="@(Model.Genre == genre ? "active" : null)" asp-action="Index" asp-route-genre="@genre">@genre</a>
+        }
+    </nav>
+
     @if (Model.Movies.Count == 0)
     {
         <div class="empty-state">
@@ -39,6 +59,13 @@
     }
     else
     {
+        <div class="browse-result-line">
+            <span>@Model.Movies.Count result@(Model.Movies.Count == 1 ? string.Empty : "s")</span>
+            @if (!string.IsNullOrWhiteSpace(Model.Query) || !string.IsNullOrWhiteSpace(Model.Genre))
+            {
+                <a asp-action="Index">Clear filters ×</a>
+            }
+        </div>
         <div class="movie-grid">
             @foreach (var movie in Model.Movies)
             {
